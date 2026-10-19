@@ -90,6 +90,7 @@ export interface GlobalGeminiSettings {
   geminiApiKey: string;
   textModel: string;
   ttsModel: string;
+  ttsTemperature?: number;
   voiceChat: string;
   callModel: string;
   voiceCall: string;
@@ -117,6 +118,7 @@ export interface UserProfile {
   lastPapTimestamp?: number;
   textModel?: string;
   ttsModel?: string;
+  ttsTemperature?: number;
   imageModel?: string;
   callModel?: string;
   voiceChat?: string;

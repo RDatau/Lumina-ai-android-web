@@ -8,6 +8,7 @@ export const DEFAULT_GLOBAL_GEMINI_SETTINGS: GlobalGeminiSettings = {
   geminiApiKey: '',
   textModel: 'gemini-3.1-flash-lite',
   ttsModel: 'gemini-2.5-flash-preview-tts',
+  ttsTemperature: 2.0,
   voiceChat: 'Aoede',
   callModel: 'gemini-2.5-flash-native-audio-preview-12-2025',
   voiceCall: 'Aoede',
@@ -52,6 +53,11 @@ export const getEffectiveGlobalGeminiSettings = (dbSettings?: Partial<GlobalGemi
     geminiApiKey: (local.geminiApiKey || dbSettings?.geminiApiKey || cachedApiKey || '').trim(),
     textModel: local.textModel || dbSettings?.textModel || DEFAULT_GLOBAL_GEMINI_SETTINGS.textModel,
     ttsModel: local.ttsModel || dbSettings?.ttsModel || DEFAULT_GLOBAL_GEMINI_SETTINGS.ttsModel,
+    ttsTemperature: typeof local.ttsTemperature === 'number' 
+      ? local.ttsTemperature 
+      : (typeof dbSettings?.ttsTemperature === 'number' 
+          ? dbSettings.ttsTemperature 
+          : (DEFAULT_GLOBAL_GEMINI_SETTINGS.ttsTemperature ?? 1.0)),
     voiceChat: local.voiceChat || dbSettings?.voiceChat || DEFAULT_GLOBAL_GEMINI_SETTINGS.voiceChat,
     callModel: local.callModel || dbSettings?.callModel || DEFAULT_GLOBAL_GEMINI_SETTINGS.callModel,
     voiceCall: safeVoiceCall,

@@ -31,6 +31,13 @@ export const getActiveTtsModel = (profile?: UserProfile): string => {
   return global.ttsModel || profile?.ttsModel || DEFAULT_GLOBAL_GEMINI_SETTINGS.ttsModel;
 };
 
+export const getActiveTtsTemperature = (profile?: UserProfile): number => {
+  const global = getEffectiveGlobalGeminiSettings();
+  if (typeof global.ttsTemperature === 'number') return global.ttsTemperature;
+  if (typeof profile?.ttsTemperature === 'number') return profile.ttsTemperature;
+  return DEFAULT_GLOBAL_GEMINI_SETTINGS.ttsTemperature ?? 2.0;
+};
+
 /**
  * Memeriksa apakah model TTS yang dipilih mendukung streaming audio bertahap (generateContentStream).
  * Model TTS generasi terbaru (gemini-3.8 / 3.1) mendukung audio streaming bertahap,
