@@ -299,7 +299,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
   const glassStyles2 = {
     backgroundColor: isBackgroundDark ? '#0a0f14' : '#ffffff',
-    border: isEmbeddedPage ? 'b' : (isBackgroundDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)')
+    border: 'none'
   };
 
   const contentNode = (
@@ -314,7 +314,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         >
           <div className="space-y-6">
             {/* Header Brand */}
-            <div className="flex items-center gap-3 pb-4 border-b border-white/10">
+            <div className="flex items-center gap-3 pb-4">
               <div 
                 className="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg transition-transform"
                 style={{ backgroundColor: themeHex || '#6366f1' }}
@@ -386,7 +386,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
 
           {/* Sidebar Bottom: Status & Selesai button */}
-          <div className="pt-4 border-t border-white/10 space-y-3">
+          <div className="pt-4 space-y-3">
             <div className={`p-2.5 rounded-xl border ${dynamicBorderColor} ${isBackgroundDark ? 'bg-white/5' : 'bg-black/5'} flex items-center justify-between`}>
               <span className={`text-[9px] font-bold uppercase tracking-wider ${dynamicMutedTextColor}`}>Aksen Aktif</span>
               <div className="flex items-center gap-2">
@@ -464,7 +464,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
           
           {/* Desktop Top Header Bar */}
-          <div className="hidden md:flex items-center justify-between px-6 py-4 border-b border-white/10 select-none flex-shrink-0">
+          <div className="hidden md:flex items-center justify-between px-6 py-4 select-none flex-shrink-0">
             <div>
               <h3 className={`text-sm font-black uppercase tracking-wider ${dynamicTextColor}`}>
                 {activeTab === 'appearance' ? 'Tampilan & Nuansa' : (activeTab === 'gemini' ? 'Konfigurasi Gemini AI' : 'Notifikasi & Getar (Mobile/Android)')}

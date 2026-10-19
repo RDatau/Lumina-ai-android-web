@@ -194,7 +194,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
   const glassStyles2 = {
     backgroundColor: isDark ? '#0a0f14' : '#ffffff',
-    border: isEmbeddedPage ? 'b' : (isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)')
+    border: 'none'
   };
 
   const headerStyle = {
@@ -211,12 +211,12 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
     >
       {/* DESKTOP LANDSCAPE SIDEBAR (Visible on md+) */}
       <div
-        className={"hidden md:flex md:w-80 lg:w-96 flex-shrink-0 flex-col justify-between border-r border-white/10 p-6 select-none"}
+        className={"hidden md:flex md:w-80 lg:w-96 flex-shrink-0 flex-col justify-between p-6 select-none"}
         style={glassStyles2}
       >
         <div className="space-y-6">
           {/* Header Brand */}
-          <div className="flex items-center justify-between pb-4 border-b border-white/10">
+          <div className="flex items-center justify-between pb-4">
             <div className="flex items-center gap-3">
               <div 
                 className="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg"
@@ -322,7 +322,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
         </div>
 
         {/* Desktop Footer Actions */}
-        <div className="pt-4 border-t border-white/10 flex gap-2">
+        <div className="pt-4 flex gap-2">
           {!isEmbeddedPage && (
             <button 
               onClick={onClose}
