@@ -2061,7 +2061,7 @@ const App: React.FC = () => {
           <div className={`w-full h-full flex overflow-hidden ${appState === AppState.SETUP ? 'pointer-events-none' : ''}`}>
             {/* Desktop Sidebar Profile Selector */}
             <div 
-              className="hidden md:flex flex-col h-full relative z-20"
+              className={`hidden md:flex flex-col h-full border-r ${appearance.isBackgroundDark ? 'border-white/10' : 'border-black/10'} relative z-20`}
               style={{ width: sidebarWidth }}
             >
               <ProfileSelectorView
