@@ -33,6 +33,11 @@ const App: React.FC = () => {
     if (newState === appState) return;
 
     if (newState === AppState.PROFILE_SELECT) {
+      if (window.history.state && window.history.state.isMediaPreview) {
+        window.history.go(-2);
+        setAppState(AppState.PROFILE_SELECT);
+        return;
+      }
       if (window.history.state && !window.history.state.isRoot) {
         window.history.back();
         return;

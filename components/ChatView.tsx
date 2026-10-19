@@ -651,17 +651,33 @@ const ChatView: React.FC<ChatViewProps> = ({
   const [showTranscript, setShowTranscript] = useState(false);
   const [transcriptText, setTranscriptText] = useState('');
 
-  const closeAllModals = () => {
+  // Media Preview Back Button Handler (Android / Browser Back)
+  const isAnyModalOpen = Boolean(previewMedia || showProfilePreview || showGallery || imageInfoData.isOpen || videoInfoData.isOpen || showTranscript || videoModalData.isOpen);
+  const modalHistoryPushedRef = useRef(false);
+
+  // Murni menutup state semua modal tanpa memanggil history.back()
+  const closeModalsStateOnly = () => {
     setPreviewMedia(null);
     setShowProfilePreview(false);
     setShowGallery(false);
+    setIsSelectionMode(false);
+    setSelectedItems(new Set());
     setImageInfoData(prev => ({ ...prev, isOpen: false }));
     setVideoInfoData(prev => ({ ...prev, isOpen: false }));
     setVideoModalData(prev => ({ ...prev, isOpen: false }));
     setShowTranscript(false);
+  };
 
-    if (window.history.state && window.history.state.isMediaPreview) {
-      window.history.back();
+  // Menutup modal dari aksi UI (tombol X, klik backdrop, escape)
+  // Menutup state sekaligus menghapus (pop) riwayat history yang sebelumnya di-push
+  const closeAllModals = () => {
+    closeModalsStateOnly();
+
+    if (modalHistoryPushedRef.current) {
+      modalHistoryPushedRef.current = false;
+      if (window.history.state && window.history.state.isMediaPreview) {
+        window.history.back();
+      }
     }
   };
 
@@ -669,25 +685,34 @@ const ChatView: React.FC<ChatViewProps> = ({
     closeAllModals();
   };
 
-  // Media Preview Back Button Handler (Android / Browser Back)
-  const isAnyModalOpen = Boolean(previewMedia || showProfilePreview || showGallery || imageInfoData.isOpen || videoInfoData.isOpen || showTranscript || videoModalData.isOpen);
-
   useEffect(() => {
     if (isAnyModalOpen) {
-      if (!window.history.state || !window.history.state.isMediaPreview) {
+      if (!modalHistoryPushedRef.current) {
         window.history.pushState({ isMediaPreview: true, appState: AppState.CHAT }, '');
+        modalHistoryPushedRef.current = true;
       }
 
       const handleMediaPopState = (e: PopStateEvent) => {
-        e.stopImmediatePropagation();
-        e.stopPropagation();
-        closeAllModals();
+        if (modalHistoryPushedRef.current) {
+          modalHistoryPushedRef.current = false;
+          e.stopImmediatePropagation();
+          e.stopPropagation();
+          closeModalsStateOnly();
+        }
       };
 
       window.addEventListener('popstate', handleMediaPopState, true);
       return () => {
         window.removeEventListener('popstate', handleMediaPopState, true);
       };
+    } else {
+      // Jika semua modal tertutup namun history masih menandai isMediaPreview, bersihkan segera
+      if (modalHistoryPushedRef.current) {
+        modalHistoryPushedRef.current = false;
+        if (window.history.state && window.history.state.isMediaPreview) {
+          window.history.back();
+        }
+      }
     }
   }, [isAnyModalOpen]);
 
@@ -732,7 +757,7 @@ const ChatView: React.FC<ChatViewProps> = ({
       };
       setMessages(prev => prev.map(m => m.id === messageId ? updatedMsg : m));
       addMessageToAgent(config.id || 'default', updatedMsg, false);
-      setPreviewMedia(null);
+      handleCloseMediaModal();
       return;
     }
 
@@ -1290,7 +1315,7 @@ const ChatView: React.FC<ChatViewProps> = ({
       if (!previewMedia) return;
       if (e.key === 'ArrowRight') handleNextMedia();
       if (e.key === 'ArrowLeft') handlePrevMedia();
-      if (e.key === 'Escape') setPreviewMedia(null);
+      if (e.key === 'Escape') handleCloseMediaModal();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -3646,7 +3671,7 @@ const ChatView: React.FC<ChatViewProps> = ({
                 <button onClick={toggleSelectionMode} className={`p-2 ${isSelectionMode ? (isBackgroundDark ? 'bg-white/20 text-white' : 'bg-black/10 text-black') : `hover:${isBackgroundDark ? 'bg-white/10' : 'bg-black/5'} ${dynamicIconColor} hover:${dynamicTextColor}`} rounded-full transition-all`} title={isSelectionMode ? "Batal Pilih" : "Pilih Item"}>
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 </button>
-                <button onClick={() => { setShowGallery(false); setIsSelectionMode(false); setSelectedItems(new Set()); }} className={`p-2 hover:${isBackgroundDark ? 'bg-white/10' : 'bg-black/5'} rounded-full transition-all ${dynamicIconColor} hover:${dynamicTextColor}`}>
+                <button onClick={handleCloseMediaModal} className={`p-2 hover:${isBackgroundDark ? 'bg-white/10' : 'bg-black/5'} rounded-full transition-all ${dynamicIconColor} hover:${dynamicTextColor}`} title="Tutup">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
               </div>
@@ -4495,7 +4520,7 @@ const ChatView: React.FC<ChatViewProps> = ({
       {showTranscript && (
         <div 
           className={`fixed inset-0 z-[300] flex items-center justify-center p-4 ${isBackgroundDark ? 'bg-black/80' : 'bg-white/80'}  animate-in fade-in duration-300`} 
-          onClick={() => setShowTranscript(false)}
+          onClick={handleCloseMediaModal}
         >
           <div 
             className={`relative max-w-2xl w-full h-[70vh] flex flex-col rounded-[35px] border ${dynamicBorderColor} shadow-2xl overflow-hidden animate-in zoom-in-95 duration-500`} 
@@ -4507,7 +4532,7 @@ const ChatView: React.FC<ChatViewProps> = ({
                 <h3 className={`text-xl font-black uppercase tracking-tighter ${dynamicTextColor}`}>Transkripsi Panggilan</h3>
                 <p className={`text-[10px] font-bold uppercase tracking-widest ${dynamicMutedTextColor}`}>Isi percakapan yang tersimpan di memori</p>
               </div>
-              <button onClick={() => setShowTranscript(false)} className={`p-2 hover:bg-white/10 rounded-full transition-all ${dynamicIconColor} hover:${dynamicTextColor}`}>
+              <button onClick={handleCloseMediaModal} className={`p-2 hover:bg-white/10 rounded-full transition-all ${dynamicIconColor} hover:${dynamicTextColor}`} title="Tutup">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>

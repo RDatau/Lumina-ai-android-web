@@ -118,8 +118,8 @@ const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, items, onClose, targetE
                   : (isBackgroundDark ? 'text-white/90 hover:bg-white/5' : 'text-black/80 hover:bg-black/5')
                 }`}
             >
-              {item.icon && <span className="opacity-70 flex-shrink-0 text-s">{item.icon}</span>}
-              <span className="font-medium text-s truncate">{item.label}</span>
+              {item.icon && <span className="opacity-70 flex-shrink-0 text-xs">{item.icon}</span>}
+              <span className="font-medium text-xs truncate">{item.label}</span>
             </button>
           ))}
         </motion.div>
