@@ -294,7 +294,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
   const glassStyles = {
     backgroundColor: isBackgroundDark ? '#0a0f14' : '#ffffff',
-    border: isBackgroundDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)'
+    border: isEmbeddedPage ? 'none' : (isBackgroundDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)')
   };
 
   const contentNode = (

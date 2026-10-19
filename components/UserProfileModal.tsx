@@ -189,7 +189,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
   const glassStyles = {
     backgroundColor: isDark ? '#0a0f14' : '#ffffff',
-    border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)'
+    border: isEmbeddedPage ? 'none' : (isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)')
   };
 
   const headerStyle = {
