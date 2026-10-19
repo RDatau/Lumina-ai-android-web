@@ -1993,7 +1993,7 @@ export const generateVideoPromptWithAI = async (
 
   try {
     const ai = createGeminiClient(userProfile);
-    const textModel = "gemini-3.1-flash-lite";
+    const textModel = getActiveTextModel(userProfile);
 
     let promptInstruction = `You are an elite AI Video Director and Prompt Engineer specializing in diffusion video generation for Wan 2.2 Image-to-Video.
 Your mission is to transform the user's action/motion request and character context into an exceptional, vivid, professional cinematic motion prompt strictly written in English.
