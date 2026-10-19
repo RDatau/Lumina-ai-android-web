@@ -309,7 +309,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     >
       {/* DESKTOP / WIDE SIDEBAR (Visible on md+) */}
         <div 
-          className={"hidden md:flex md:w-60 lg:w-72 flex-shrink-0 flex-col justify-between border-r border-white/10 p-5 lg:p-6 bg-black/15 select-none"}
+          className={"hidden md:flex md:w-60 lg:w-72 flex-shrink-0 flex-col justify-between p-5 lg:p-6 bg-black/15 select-none"}
           style={glassStyles2}
         >
           <div className="space-y-6">
