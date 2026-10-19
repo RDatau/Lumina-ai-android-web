@@ -192,6 +192,11 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
     border: isEmbeddedPage ? 'none' : (isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)')
   };
 
+  const glassStyles2 = {
+    backgroundColor: isDark ? '#0a0f14' : '#ffffff',
+    border: isEmbeddedPage ? 'b' : (isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)')
+  };
+
   const headerStyle = {
     backgroundColor: isDark ? '#0a0f14' : '#ffffff'
   };
@@ -205,7 +210,10 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
       style={glassStyles}
     >
       {/* DESKTOP LANDSCAPE SIDEBAR (Visible on md+) */}
-      <div className="hidden md:flex md:w-80 lg:w-96 flex-shrink-0 flex-col justify-between border-r border-white/10 p-6 bg-black/15 select-none">
+      <div
+        className={"hidden md:flex md:w-80 lg:w-96 flex-shrink-0 flex-col justify-between border-r border-white/10 p-6 select-none"}
+        style={glassStyles2}
+      >
         <div className="space-y-6">
           {/* Header Brand */}
           <div className="flex items-center justify-between pb-4 border-b border-white/10">
@@ -642,7 +650,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-6">
       {/* Overlay */}
       <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300" 
+        className="absolute inset-0 bg-black/60 animate-in fade-in duration-300" 
         onClick={onClose} 
       />
       {contentNode}

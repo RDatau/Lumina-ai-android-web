@@ -1079,7 +1079,7 @@ const CallView: React.FC<CallViewProps> = ({
           <h1 className="text-xl font-black tracking-tighter truncate max-w-[90%]">{config.name}</h1>
           <div className="flex flex-col items-center gap-1.5">
             <p 
-              className={`font-black px-4 py-0.5 rounded-full text-[9px] border backdrop-blur-3xl transition-all duration-500 ${isQuotaError ? 'text-orange-400 bg-orange-500/10 border-orange-500/20' : 'text-white border-white/5'}`}
+              className={`font-black px-4 py-0.5 rounded-full text-[9px] border transition-all duration-500 ${isQuotaError ? 'text-orange-400 bg-orange-500/10 border-orange-500/20' : 'text-white border-white/5'}`}
               style={!isQuotaError ? { backgroundColor: 'rgba(var(--theme-color-rgb), 0.3)' } : {}}
             >
               {status}
@@ -1092,7 +1092,7 @@ const CallView: React.FC<CallViewProps> = ({
             )}
             {errorMessage && (
               <div className="flex flex-col items-center gap-1.5 animate-in slide-in-from-top-1">
-                <p className="text-[9px] text-white font-bold bg-red-500/60 backdrop-blur-lg px-4 py-1 rounded-full uppercase text-center max-w-sm shadow-xl border border-white/10">{errorMessage}</p>
+                <p className="text-[9px] text-white font-bold bg-red-500/80 px-4 py-1 rounded-full uppercase text-center max-w-sm shadow-xl border border-white/10">{errorMessage}</p>
                 {!isQuotaError && (
                   <div className="flex items-center gap-2">
                     {reconnectCountdown !== null ? (
@@ -1154,7 +1154,7 @@ const CallView: React.FC<CallViewProps> = ({
           
           {/* REASONING BOX (KECIL) */}
           {agentReasoningText && (
-            <div className="w-full bg-black/20 backdrop-blur-md rounded-xl border border-white/5 p-2 transition-all max-h-[60px] overflow-y-auto custom-scrollbar flex items-start justify-start text-left">
+            <div className="w-full bg-black/40 rounded-xl border border-white/5 p-2 transition-all max-h-[60px] overflow-y-auto custom-scrollbar flex items-start justify-start text-left">
                <p className="text-[8px] md:text-[10px] font-mono text-white/40 leading-tight">
                  <span className="text-white/60 font-bold">[Proses Internal]:</span> {agentReasoningText}
                </p>
@@ -1162,7 +1162,7 @@ const CallView: React.FC<CallViewProps> = ({
           )}
 
           {/* SPEECH BOX (BESAR) */}
-          <div className="w-full bg-white/5 backdrop-blur-3xl rounded-[22px] md:rounded-[32px] border border-white/10 p-4 md:p-8 transition-all shadow-xl min-h-[60px] md:min-h-[200px] max-h-[150px] md:max-h-[400px] overflow-y-auto custom-scrollbar flex items-center justify-center md:justify-start text-center md:text-left">
+          <div className="w-full bg-white/10 rounded-[22px] md:rounded-[32px] border border-white/10 p-4 md:p-8 transition-all shadow-xl min-h-[60px] md:min-h-[200px] max-h-[150px] md:max-h-[400px] overflow-y-auto custom-scrollbar flex items-center justify-center md:justify-start text-center md:text-left">
              {agentSpeechText ? (
                <p className="text-[10px] md:text-lg lg:text-2xl font-black text-white leading-tight animate-in fade-in slide-in-from-bottom-1 duration-500">"{agentSpeechText}"</p>
              ) : (
@@ -1212,7 +1212,7 @@ const CallView: React.FC<CallViewProps> = ({
               <button
                 onClick={() => setShowAutoPokeSettings(!showAutoPokeSettings)}
                 title="Atur Waktu Auto Poke"
-                className={`-ml-2 p-1.5 rounded-full border border-white/10 bg-black/80 backdrop-blur-md transition-all hover:scale-110 active:scale-95 z-10 ${
+                className={`-ml-2 p-1.5 rounded-full border border-white/10 bg-black/90 transition-all hover:scale-110 active:scale-95 z-10 ${
                   isAutoPokeEnabled ? 'text-amber-300' : 'text-white/40'
                 }`}
               >
@@ -1226,7 +1226,7 @@ const CallView: React.FC<CallViewProps> = ({
             {showAutoPokeSettings && (
               <div 
                 ref={autoPokeSettingsRef}
-                className="absolute bottom-16 left-1/2 -translate-x-1/2 bg-zinc-900/95 backdrop-blur-2xl p-4 rounded-3xl border border-white/20 shadow-2xl w-64 flex flex-col gap-3 animate-in slide-in-from-bottom-4 duration-200 z-50 text-left select-none"
+                className="absolute bottom-16 left-1/2 -translate-x-1/2 bg-zinc-900 p-4 rounded-3xl border border-white/20 shadow-2xl w-64 flex flex-col gap-3 animate-in slide-in-from-bottom-4 duration-200 z-50 text-left select-none"
               >
                 <div className="flex items-center justify-between pb-2 border-b border-white/10">
                   <div className="flex items-center gap-1.5">
@@ -1304,7 +1304,7 @@ const CallView: React.FC<CallViewProps> = ({
             {showQuickVolume && (
               <div 
                 ref={volumeSliderRef}
-                className="absolute bottom-16 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-2xl p-4 rounded-3xl border border-white/20 shadow-2xl w-12 flex flex-col items-center gap-3 animate-in slide-in-from-bottom-4 duration-200"
+                className="absolute bottom-16 left-1/2 -translate-x-1/2 bg-black/90 p-4 rounded-3xl border border-white/20 shadow-2xl w-12 flex flex-col items-center gap-3 animate-in slide-in-from-bottom-4 duration-200"
               >
                 <div className="h-32 flex flex-col items-center">
                   <input 
@@ -1329,7 +1329,7 @@ const CallView: React.FC<CallViewProps> = ({
         </div>
 
         <div 
-          className="w-full flex items-end gap-3 bg-white/5 border border-white/10 rounded-[28px] p-1.5 pl-6 shadow-2xl backdrop-blur-3xl ring-1 ring-white/5"
+          className="w-full flex items-end gap-3 bg-white/10 border border-white/10 rounded-[28px] p-1.5 pl-6 shadow-2xl ring-1 ring-white/5"
           style={{ 
             borderColor: inputText.trim() ? `${themeHex}40` : undefined,
             boxShadow: inputText.trim() ? `0 0 20px ${themeHex}10` : undefined
@@ -1365,7 +1365,7 @@ const CallView: React.FC<CallViewProps> = ({
 
       {showSettings && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 animate-in fade-in zoom-in duration-300">
-           <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setShowSettings(false)} />
+           <div className="absolute inset-0 bg-black/85" onClick={() => setShowSettings(false)} />
            <div className="relative w-full max-sm bg-zinc-900 border border-white/10 rounded-[35px] p-6 shadow-2xl overflow-y-auto custom-scrollbar max-h-[70vh]">
               <header className="flex justify-between items-center mb-6">
                  <h3 className="text-xs font-black uppercase tracking-widest" style={{ color: themeHex }}>Settings</h3>

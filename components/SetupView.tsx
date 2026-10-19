@@ -213,12 +213,12 @@ const SetupView: React.FC<SetupViewProps> = ({
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-4 md:p-6">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300" 
+        className="absolute inset-0 bg-black/60 animate-in fade-in duration-300" 
         onClick={onClose} 
       />
       
       {/* Modal Container: expands to landscape on md+ screens */}
-      <div className={`relative w-full max-w-lg md:max-w-4xl lg:max-w-5xl xl:max-w-6xl md:h-[84vh] md:max-h-[720px] max-h-[92vh] ${dynamicBg} backdrop-blur-2xl border ${dynamicBorderColor} rounded-3xl md:rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col md:flex-row`}>
+      <div className={`relative w-full max-w-lg md:max-w-4xl lg:max-w-5xl xl:max-w-6xl md:h-[84vh] md:max-h-[720px] max-h-[92vh] ${dynamicBg} border ${dynamicBorderColor} rounded-3xl md:rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col md:flex-row`}>
         
         {/* DESKTOP / WIDE SIDEBAR (Visible on md+) */}
         <div className="hidden md:flex md:w-64 lg:w-72 flex-shrink-0 flex-col justify-between border-r border-white/10 p-5 lg:p-6 bg-black/15 select-none">

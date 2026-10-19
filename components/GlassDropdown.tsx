@@ -72,7 +72,7 @@ const GlassDropdown: React.FC<GlassDropdownProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full ${isBackgroundDark ? 'bg-white/5 hover:bg-white/10' : 'bg-black/5 hover:bg-black/10'} backdrop-blur-xl border ${dynamicBorderColor} ${
+        className={`w-full ${isBackgroundDark ? 'bg-white/10 hover:bg-white/15' : 'bg-black/10 hover:bg-black/15'} border ${dynamicBorderColor} ${
           isSmall 
             ? 'rounded-xl px-3.5 py-2.5 text-xs font-semibold' 
             : 'rounded-[25px] px-6 py-4 text-sm font-bold shadow-xl'
@@ -93,7 +93,7 @@ const GlassDropdown: React.FC<GlassDropdownProps> = ({
       </button>
 
       {isOpen && (
-        <div className={`absolute z-[100] w-full mt-1.5 ${isBackgroundDark ? 'bg-zinc-950/95' : 'bg-white/95'} backdrop-blur-2xl border ${dynamicBorderColor} ${
+        <div className={`absolute z-[100] w-full mt-1.5 ${isBackgroundDark ? 'bg-zinc-950' : 'bg-white'} border ${dynamicBorderColor} ${
           isSmall ? 'rounded-xl p-1.5 shadow-xl' : 'rounded-[25px] p-2 shadow-2xl'
         } overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top`}>
           <div className="max-h-56 overflow-y-auto custom-scrollbar p-0.5 flex flex-col gap-1">

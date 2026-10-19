@@ -1663,7 +1663,7 @@ const App: React.FC = () => {
       <div className="flex-1 w-full flex flex-col pt-0 overflow-hidden">
       {/* Restoring Overlay */}
       {restoringStatus && (
-        <div className="fixed inset-0 z-[1000] bg-black/60 backdrop-blur-[40px] flex flex-col items-center justify-center animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[1000] bg-black/85 flex flex-col items-center justify-center animate-in fade-in duration-300">
            <div className="relative w-24 h-24 mb-8">
               <div className="absolute inset-0 border-4 border-white/5 rounded-[30px] rotate-45"></div>
               <div 
@@ -1686,8 +1686,8 @@ const App: React.FC = () => {
       {/* Global Confirm Modal */}
       {confirmDialog && (
         <div className="fixed inset-0 z-[2000] flex items-center justify-center p-6 animate-in fade-in duration-300">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-2xl" onClick={() => setConfirmDialog(null)} />
-          <div className={`relative w-full max-w-sm border ${appearance.isBackgroundDark ? 'border-white/20 bg-zinc-900/90' : 'border-black/10 bg-white/75'} rounded-[40px] p-8 shadow-2xl overflow-hidden group backdrop-blur-xl`}>
+          <div className="absolute inset-0 bg-black/85" onClick={() => setConfirmDialog(null)} />
+          <div className={`relative w-full max-w-sm border ${appearance.isBackgroundDark ? 'border-white/20 bg-zinc-950' : 'border-black/10 bg-white'} rounded-[40px] p-8 shadow-2xl overflow-hidden group`}>
             <div className={`absolute -top-24 -right-24 w-48 h-48 ${appearance.isBackgroundDark ? 'bg-red-500/20' : 'bg-red-500/10'} blur-[80px] rounded-full group-hover:bg-red-500/30 transition-all duration-700`} />
             
             <header className="text-center mb-8">

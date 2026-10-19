@@ -442,7 +442,7 @@ export const ImageInfoModal: React.FC<ImageInfoModalProps> = ({
 
   return (
     <div 
-      className={`fixed inset-0 z-[500] flex items-center justify-center p-3 md:p-6 bg-black/75 backdrop-blur-md animate-in fade-in duration-200 ${typeof window !== 'undefined' && !!(window as any).electron?.isElectron ? 'pt-8' : ''}`}
+      className={`fixed inset-0 z-[500] flex items-center justify-center p-3 md:p-6 bg-black/75 animate-in fade-in duration-200 ${typeof window !== 'undefined' && !!(window as any).electron?.isElectron ? 'pt-8' : ''}`}
       onClick={onClose}
     >
       <div 
@@ -513,7 +513,7 @@ export const ImageInfoModal: React.FC<ImageInfoModalProps> = ({
                     className="w-full h-full object-cover blur-2xl md:blur-3xl opacity-50 scale-125 saturate-150 transition-all duration-500"
                     aria-hidden="true"
                   />
-                  <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px]" />
+                   <div className="absolute inset-0 bg-black/30" />
                 </div>
               )}
 
@@ -529,7 +529,7 @@ export const ImageInfoModal: React.FC<ImageInfoModalProps> = ({
               />
 
               {/* Floating Overlay Controls on Image Preview */}
-              <div className="absolute top-2 right-2 z-20 flex items-center gap-1 bg-black/70 backdrop-blur-md px-2 py-1 rounded-full border border-white/20 shadow-lg">
+              <div className="absolute top-2 right-2 z-20 flex items-center gap-1 bg-black/80 px-2 py-1 rounded-full border border-white/20 shadow-lg">
                 <span className="text-[10px] font-black text-white px-1.5 py-0.5 rounded-full bg-white/10">
                   {Math.round(scale * 100)}%
                 </span>
@@ -563,10 +563,10 @@ export const ImageInfoModal: React.FC<ImageInfoModalProps> = ({
 
               {/* Touch Pinch & Pan Helper Banner */}
               <div className="absolute bottom-2 left-2.5 right-2.5 z-10 flex justify-between items-center text-white pointer-events-none">
-                <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-md border border-white/20 text-white/80">
+                <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-black/80 border border-white/20 text-white/80">
                   {scale > 1 ? '✋ Geser untuk Pan' : '🤌 Pinch / Scroll untuk Zoom'}
                 </span>
-                <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-md border border-white/20">
+                <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-black/80 border border-white/20">
                   {dimensions ? `${dimensions.width} × ${dimensions.height}` : 'Memuat...'}
                 </span>
               </div>

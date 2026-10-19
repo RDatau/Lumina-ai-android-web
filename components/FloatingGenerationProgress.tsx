@@ -185,10 +185,10 @@ export const FloatingGenerationProgress: React.FC<FloatingGenerationProgressProp
             isDismissTargetActive ? 'scale-125' : 'scale-100 opacity-70'
           }`}
         >
-          <div className={`w-14 h-14 rounded-full flex items-center justify-center border-2 transition-all shadow-2xl backdrop-blur-xl ${
+          <div className={`w-14 h-14 rounded-full flex items-center justify-center border-2 transition-all shadow-2xl ${
             isDismissTargetActive 
-              ? 'bg-rose-600/80 border-white text-white animate-pulse ring-4 ring-rose-500/40' 
-              : 'bg-black/60 border-white/30 text-white/70'
+              ? 'bg-rose-600 border-white text-white animate-pulse ring-4 ring-rose-500/40' 
+              : 'bg-black border-white/30 text-white/70'
           }`}>
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
@@ -231,10 +231,10 @@ export const FloatingGenerationProgress: React.FC<FloatingGenerationProgressProp
                 <div 
                   className={`absolute top-1/2 -translate-y-1/2 ${
                     isLeftAligned ? 'left-14 origin-left' : 'right-14 origin-right'
-                  } whitespace-nowrap px-3 py-2 rounded-2xl text-xs font-bold shadow-2xl backdrop-blur-2xl border flex flex-col gap-0.5 animate-in fade-in zoom-in-95 duration-150 z-50 pointer-events-none ${
+                  } whitespace-nowrap px-3 py-2 rounded-2xl text-xs font-bold shadow-2xl border flex flex-col gap-0.5 animate-in fade-in zoom-in-95 duration-150 z-50 pointer-events-none ${
                     isBackgroundDark 
-                      ? 'bg-zinc-900/95 border-white/20 text-white' 
-                      : 'bg-white/95 border-black/10 text-zinc-900'
+                      ? 'bg-zinc-900 border-white/20 text-white' 
+                      : 'bg-white border-black/10 text-zinc-900'
                   }`}
                   style={{
                     boxShadow: `0 10px 30px rgba(0,0,0,0.5)`

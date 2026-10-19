@@ -124,10 +124,10 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
           ? `0 10px 30px rgba(0,0,0,0.6), 0 0 18px ${themeHex}20`
           : `0 10px 30px rgba(0,0,0,0.12), 0 0 15px ${themeHex}25`
       }}
-      className={`relative pointer-events-auto backdrop-blur-2xl border rounded-2xl p-3.5 md:p-4 shadow-2xl select-none cursor-grab active:cursor-grabbing transition-colors duration-200 animate-in slide-in-from-top-4 duration-300 ${
+      className={`relative pointer-events-auto border rounded-2xl p-3.5 md:p-4 shadow-2xl select-none cursor-grab active:cursor-grabbing transition-colors duration-200 animate-in slide-in-from-top-4 duration-300 ${
         isBackgroundDark
-          ? 'bg-zinc-900/90 border-white/20 text-white shadow-black/80'
-          : 'bg-white/95 border-black/15 text-zinc-900 shadow-xl shadow-zinc-400/20'
+          ? 'bg-zinc-900 border-white/20 text-white shadow-black/80'
+          : 'bg-white border-black/15 text-zinc-900 shadow-xl shadow-zinc-400/20'
       }`}
     >
       {/* Visual Mobile Swipe Indicator Pill (Garis Kecil Petunjuk Drag) */}

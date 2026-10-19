@@ -38,9 +38,9 @@ export const VideoInfoModal: React.FC<VideoInfoModalProps> = ({
   const formattedDate = timestamp ? new Date(timestamp).toLocaleString() : new Date().toLocaleString();
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in ${typeof window !== 'undefined' && !!(window as any).electron?.isElectron ? 'pt-8' : ''}`} onClick={onClose}>
+    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 animate-fade-in ${typeof window !== 'undefined' && !!(window as any).electron?.isElectron ? 'pt-8' : ''}`} onClick={onClose}>
       <div 
-        className={`relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl p-6 shadow-2xl border ${isBackgroundDark ? 'bg-zinc-900/95 border-white/20 text-white' : 'bg-white/95 border-black/15 text-zinc-900'} backdrop-blur-xl`}
+        className={`relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl p-6 shadow-2xl border ${isBackgroundDark ? 'bg-zinc-900 border-white/20 text-white' : 'bg-white border-black/15 text-zinc-900'}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10">

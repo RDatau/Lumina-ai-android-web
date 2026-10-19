@@ -359,7 +359,7 @@ export const WanVideoModal: React.FC<WanVideoModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 z-[250] flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-2xl animate-in fade-in duration-300"
+      className="fixed inset-0 z-[250] flex items-center justify-center p-3 sm:p-5 bg-black/85 animate-in fade-in duration-300"
       onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
       onDrop={(e) => { e.preventDefault(); e.stopPropagation(); }}
     >
@@ -388,7 +388,7 @@ export const WanVideoModal: React.FC<WanVideoModalProps> = ({
         />
 
         {/* Modal Header */}
-        <div className="sticky top-0 z-20 flex items-center justify-between px-6 py-4 bg-zinc-950/80 backdrop-blur-xl border-b border-white/10 select-none">
+        <div className="sticky top-0 z-20 flex items-center justify-between px-6 py-4 bg-zinc-950 border-b border-white/10 select-none">
           <div className="flex items-center gap-3">
             <div 
               className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg border border-white/20"
@@ -460,7 +460,7 @@ export const WanVideoModal: React.FC<WanVideoModalProps> = ({
               }}
             >
               {isDraggingStart && (
-                <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-indigo-500/25 backdrop-blur-sm rounded-2xl animate-in fade-in duration-200 pointer-events-none">
+                <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-indigo-500/40 rounded-2xl animate-in fade-in duration-200 pointer-events-none">
                   <div className="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center shadow-xl mb-2 animate-bounce">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -553,7 +553,7 @@ export const WanVideoModal: React.FC<WanVideoModalProps> = ({
               }}
             >
               {isDraggingEnd && (
-                <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-indigo-500/25 backdrop-blur-sm rounded-2xl animate-in fade-in duration-200 pointer-events-none">
+                <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-indigo-500/40 rounded-2xl animate-in fade-in duration-200 pointer-events-none">
                   <div className="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center shadow-xl mb-2 animate-bounce">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -649,7 +649,7 @@ export const WanVideoModal: React.FC<WanVideoModalProps> = ({
             }}
           >
             {isDraggingIdentity && (
-              <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-indigo-500/25 backdrop-blur-sm rounded-2xl animate-in fade-in duration-200 pointer-events-none">
+              <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-indigo-500/40 rounded-2xl animate-in fade-in duration-200 pointer-events-none">
                 <div className="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center shadow-xl mb-2 animate-bounce">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -1023,7 +1023,7 @@ export const WanVideoModal: React.FC<WanVideoModalProps> = ({
         </div>
 
         {/* Modal Footer / Action CTA */}
-        <div className="sticky bottom-0 z-20 px-6 py-4 bg-zinc-950/90 backdrop-blur-xl border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="sticky bottom-0 z-20 px-6 py-4 bg-zinc-950 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="text-[11px] text-white/50 text-center sm:text-left">
             <span>Image to Video · </span>
             <span className="text-white/70">Start Frame (wajib)</span>

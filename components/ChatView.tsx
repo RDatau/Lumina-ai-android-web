@@ -950,6 +950,7 @@ const ChatView: React.FC<ChatViewProps> = ({
 
   // Performance Optimization: Cache base64 data URLs as lightweight native Blob URLs
   const [previewVideoBlobUrl, setPreviewVideoBlobUrl] = useState<string | null>(null);
+  const [activeStickyDate, setActiveStickyDate] = useState<string | null>(null);
 
   useEffect(() => {
     if (!previewMedia || !previewMedia.data) {
@@ -1516,6 +1517,26 @@ const ChatView: React.FC<ChatViewProps> = ({
 
       if (el.scrollTop <= 0) el.scrollTop = 1;
       else if (el.scrollTop + el.offsetHeight >= el.scrollHeight) el.scrollTop = el.scrollHeight - el.offsetHeight - 1;
+
+      // WhatsApp-style Sticky Date detection
+      const separators = el.querySelectorAll('[data-date-separator]');
+      let currentActiveDate: string | null = null;
+      const containerTop = el.getBoundingClientRect().top;
+      
+      // If we are at the very top, don't show the sticky date
+      if (el.scrollTop <= 50) {
+        currentActiveDate = null;
+      } else {
+        separators.forEach((sep) => {
+          const rect = sep.getBoundingClientRect();
+          // Check if the separator has passed the top of the container (with a slight offset)
+          if (rect.top - containerTop <= 100) {
+            currentActiveDate = sep.getAttribute('data-date');
+          }
+        });
+      }
+
+      setActiveStickyDate(currentActiveDate);
     };
 
     const handleTouchStart = (e: TouchEvent) => {
@@ -2753,10 +2774,31 @@ const ChatView: React.FC<ChatViewProps> = ({
           overscrollBehaviorY: 'contain',
           touchAction: 'pan-y', 
           WebkitOverflowScrolling: 'touch',
-          paddingTop: isSearching ? '130px' : '70px',
+          paddingTop: isSearching ? '170px' : '110px',
           paddingBottom: attachedFiles.length > 0 ? '220px' : '140px'
         }} 
       >
+        {/* WhatsApp-Style Floating Sticky Date Header */}
+        {activeStickyDate && (
+          <div 
+            className="sticky z-30 flex justify-center pointer-events-none mb-4 animate-in fade-in zoom-in-95 duration-200"
+            style={{ 
+              top: typeof window !== 'undefined' && window.innerWidth >= 768 ? '-13px' : '-27px'
+            }}
+          >
+            <div 
+              className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-xl border ${dynamicBorderColor} pointer-events-auto`}
+              style={{
+                ...glassStyles,
+                backgroundColor: isBackgroundDark ? 'rgb(10, 15, 20)' : 'rgb(255, 255, 255)',
+                color: isBackgroundDark ? 'rgb(255, 255, 255)' : 'rgb(10, 15, 20)'
+              }}
+            >
+              {activeStickyDate}
+            </div>
+          </div>
+        )}
+
         <div className="pt-0"></div>
         {filteredThread.map((m, idx) => {
           const prevMsg = idx > 0 ? filteredThread[idx - 1] : null;
@@ -2766,13 +2808,17 @@ const ChatView: React.FC<ChatViewProps> = ({
           return (
             <React.Fragment key={m.id}>
               {showDateSeparator && (
-                <div className="sticky top-2 z-20 flex justify-center my-6 pointer-events-none">
+                <div 
+                  className="flex justify-center my-6 pointer-events-none"
+                  data-date-separator="true"
+                  data-date={formatDateSeparator(m.timestamp)}
+                >
                   <div 
                     className={`px-5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg border ${dynamicBorderColor} pointer-events-auto`}
                     style={{
                       ...glassStyles,
-                      backgroundColor: isBackgroundDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.8)',
-                      color: isBackgroundDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)'
+                      backgroundColor: isBackgroundDark ? 'rgb(10, 15, 20)' : 'rgb(255, 255, 255)',
+                      color: isBackgroundDark ? 'rgb(255, 255, 255)' : 'rgb(10, 15, 20)'
                     }}
                   >
                     {formatDateSeparator(m.timestamp)}

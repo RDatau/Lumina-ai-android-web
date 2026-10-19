@@ -88,7 +88,7 @@ const CharacterWizard: React.FC<CharacterWizardProps> = ({ onBack, onAdd, userPr
   return (
     <div className={`flex flex-col h-full font-sans overflow-hidden ${isBackgroundDark ? 'bg-zinc-950 text-zinc-100' : 'bg-zinc-50 text-zinc-900'}`}>
       {/* Header */}
-      <div className={`flex items-center p-4 border-b backdrop-blur-md sticky top-0 z-10 ${isBackgroundDark ? 'border-white/10 bg-zinc-900/50' : 'border-zinc-200 bg-white/80'}`}>
+      <div className={`flex items-center p-4 border-b sticky top-0 z-10 ${isBackgroundDark ? 'border-white/10 bg-zinc-900/90' : 'border-zinc-200 bg-white/95'}`}>
         <button 
           onClick={onBack}
           className={`p-2 rounded-full transition-colors mr-2 ${isBackgroundDark ? 'hover:bg-white/10' : 'hover:bg-zinc-200'}`}

@@ -297,13 +297,21 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     border: isEmbeddedPage ? 'none' : (isBackgroundDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)')
   };
 
+  const glassStyles2 = {
+    backgroundColor: isBackgroundDark ? '#0a0f14' : '#ffffff',
+    border: isEmbeddedPage ? 'b' : (isBackgroundDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)')
+  };
+
   const contentNode = (
     <div 
       className={`relative w-full ${isEmbeddedPage ? 'h-full rounded-none border-none shadow-none pb-[85px] md:pb-0' : 'max-w-lg md:max-w-4xl lg:max-w-5xl xl:max-w-6xl md:h-[84vh] md:max-h-[720px] max-h-[92vh] rounded-3xl md:rounded-[32px] border ' + dynamicBorderColor + ' shadow-2xl'} overflow-hidden animate-in fade-in duration-300 flex flex-col md:flex-row`}
       style={glassStyles}
     >
       {/* DESKTOP / WIDE SIDEBAR (Visible on md+) */}
-        <div className="hidden md:flex md:w-60 lg:w-72 flex-shrink-0 flex-col justify-between border-r border-white/10 p-5 lg:p-6 bg-black/15 select-none">
+        <div 
+          className={"hidden md:flex md:w-60 lg:w-72 flex-shrink-0 flex-col justify-between border-r border-white/10 p-5 lg:p-6 bg-black/15 select-none"}
+          style={glassStyles2}
+        >
           <div className="space-y-6">
             {/* Header Brand */}
             <div className="flex items-center gap-3 pb-4 border-b border-white/10">
@@ -326,11 +334,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 className={`w-full text-left p-3 rounded-2xl transition-all flex items-center gap-3 border ${
                   activeTab === 'appearance'
                     ? (isBackgroundDark ? 'bg-white/10 border-white/20 text-white shadow-md' : 'bg-black/10 border-black/10 text-zinc-900 shadow-md')
-                    : 'border-transparent text-white/50 hover:bg-white/5 hover:text-white/80'
+                    : (isBackgroundDark ? 'border-transparent text-white/50 hover:bg-white/5 hover:text-white/80' : 'border-transparent text-zinc-600 hover:bg-black/5 hover:text-zinc-950')
                 }`}
                 style={activeTab === 'appearance' ? { borderLeftColor: themeHex || '#6366f1', borderLeftWidth: '4px' } : {}}
               >
-                <div className={`p-2 rounded-xl ${activeTab === 'appearance' ? 'bg-white/10' : 'bg-transparent'}`}>
+                <div className={`p-2 rounded-xl ${activeTab === 'appearance' ? (isBackgroundDark ? 'bg-white/10' : 'bg-black/10') : 'bg-transparent'}`}>
                   <Palette className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -344,11 +352,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 className={`w-full text-left p-3 rounded-2xl transition-all flex items-center gap-3 border ${
                   activeTab === 'gemini'
                     ? (isBackgroundDark ? 'bg-white/10 border-white/20 text-white shadow-md' : 'bg-black/10 border-black/10 text-zinc-900 shadow-md')
-                    : 'border-transparent text-white/50 hover:bg-white/5 hover:text-white/80'
+                    : (isBackgroundDark ? 'border-transparent text-white/50 hover:bg-white/5 hover:text-white/80' : 'border-transparent text-zinc-600 hover:bg-black/5 hover:text-zinc-950')
                 }`}
                 style={activeTab === 'gemini' ? { borderLeftColor: themeHex || '#6366f1', borderLeftWidth: '4px' } : {}}
               >
-                <div className={`p-2 rounded-xl ${activeTab === 'gemini' ? 'bg-white/10' : 'bg-transparent'}`}>
+                <div className={`p-2 rounded-xl ${activeTab === 'gemini' ? (isBackgroundDark ? 'bg-white/10' : 'bg-black/10') : 'bg-transparent'}`}>
                   <Sparkles className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -362,11 +370,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 className={`w-full text-left p-3 rounded-2xl transition-all flex items-center gap-3 border ${
                   activeTab === 'notifications'
                     ? (isBackgroundDark ? 'bg-white/10 border-white/20 text-white shadow-md' : 'bg-black/10 border-black/10 text-zinc-900 shadow-md')
-                    : 'border-transparent text-white/50 hover:bg-white/5 hover:text-white/80'
+                    : (isBackgroundDark ? 'border-transparent text-white/50 hover:bg-white/5 hover:text-white/80' : 'border-transparent text-zinc-600 hover:bg-black/5 hover:text-zinc-950')
                 }`}
                 style={activeTab === 'notifications' ? { borderLeftColor: themeHex || '#6366f1', borderLeftWidth: '4px' } : {}}
               >
-                <div className={`p-2 rounded-xl ${activeTab === 'notifications' ? 'bg-white/10' : 'bg-transparent'}`}>
+                <div className={`p-2 rounded-xl ${activeTab === 'notifications' ? (isBackgroundDark ? 'bg-white/10' : 'bg-black/10') : 'bg-transparent'}`}>
                   <Bell className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -496,7 +504,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
                     <div 
                       ref={wallpaperRef}
-                      className={`relative w-full aspect-video rounded-2xl overflow-hidden border-2 transition-all duration-300 ${isDragging ? 'border-indigo-500 scale-[1.02] shadow-2xl' : dynamicBorderColor} bg-black/30 group ${appearance.accentColorMode === 'wallpaper' ? 'cursor-none ring-2 ring-offset-2 ring-offset-transparent' : ''}`}
+                      className={`relative w-full aspect-video rounded-2xl overflow-hidden border-2 transition-all duration-300 ${isDragging ? 'border-indigo-500 scale-[1.02] shadow-2xl' : dynamicBorderColor} ${isBackgroundDark ? 'bg-black/40' : 'bg-zinc-200'} group ${appearance.accentColorMode === 'wallpaper' ? 'cursor-none ring-2 ring-offset-2 ring-offset-transparent' : ''}`}
                       style={appearance.accentColorMode === 'wallpaper' ? { ringColor: themeHex } : {}}
                       onClick={handleWallpaperClick}
                       onMouseMove={handleWallpaperMouseMove}
@@ -508,15 +516,15 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                       {appearance.background && appearance.background !== 'google-theme' ? (
                         <img src={appearance.background} className={`w-full h-full object-cover pointer-events-none transition-all duration-300 ${isDragging ? 'blur-sm opacity-50' : ''}`} alt="Custom Background" crossOrigin="anonymous" />
                       ) : (
-                        <div className={`w-full h-full flex flex-col items-center justify-center text-zinc-400 text-xs gap-1 transition-all duration-300 ${isDragging ? 'opacity-0' : ''}`}>
-                          <span className="font-semibold">Tema Standar Lumina</span>
-                          <span className="text-[9px] opacity-60">Tarik gambar kemari atau klik ganti</span>
+                        <div className={`w-full h-full flex flex-col items-center justify-center ${isBackgroundDark ? 'text-zinc-300' : 'text-zinc-800'} text-xs gap-1 transition-all duration-300 ${isDragging ? 'opacity-0' : ''}`}>
+                          <span className="font-bold">Tema Standar Lumina</span>
+                          <span className="text-[9px] opacity-80">Tarik gambar kemari atau klik ganti</span>
                         </div>
                       )}
 
                       {/* Drag Overlay Feedback */}
                       {isDragging && (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-indigo-500/20 backdrop-blur-sm animate-in fade-in duration-200">
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-indigo-500/30 animate-in fade-in duration-200">
                           <div className="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center shadow-xl mb-2 animate-bounce">
                             <Upload className="h-5 w-5 text-white" />
                           </div>
@@ -550,13 +558,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                       {appearance.accentColorMode !== 'wallpaper' && (
                         <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-all cursor-pointer">
                           <input type="file" className="hidden" accept="image/*" onChange={handleBackgroundUpload} />
-                          <span className="text-white text-[9px] font-black uppercase tracking-wider bg-white/20 px-3 py-1.5 rounded-full backdrop-blur-md border border-white/30 shadow-md">Ganti Background</span>
+                          <span className="text-white text-[9px] font-black uppercase tracking-wider bg-black/70 px-3 py-1.5 rounded-full border border-white/30 shadow-md">Ganti Background</span>
                         </label>
                       )}
                       {appearance.accentColorMode === 'wallpaper' && !mousePos && (
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                           <span 
-                            className="text-white text-[9px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full backdrop-blur-md border border-white/30 shadow-xl"
+                            className="text-white text-[9px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full bg-black/80 border border-white/30 shadow-xl"
                             style={{ backgroundColor: `${themeHex}CC` }}
                           >
                             Klik area wallpaper untuk ambil warna
@@ -1504,7 +1512,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-4 md:p-6">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300" 
+        className="absolute inset-0 bg-black/60 animate-in fade-in duration-300" 
         onClick={onClose} 
       />
       {contentNode}

@@ -161,7 +161,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       {/* RESTORE PREVIEW MODAL */}
       {pendingRestoreData && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 animate-in fade-in duration-300">
-           <div className="absolute inset-0 bg-black/80 backdrop-blur-2xl" onClick={() => setPendingRestoreData(null)} />
+           <div className="absolute inset-0 bg-black/85" onClick={() => setPendingRestoreData(null)} />
            <div className={`relative w-full max-w-sm ${isBackgroundDark ? 'bg-zinc-900 border-white/20' : 'bg-white border-black/10'} border rounded-[40px] p-8 shadow-2xl overflow-hidden group`}>
                <div 
                 className="absolute -top-24 -right-24 w-48 h-48 blur-[80px] rounded-full transition-all duration-700" 
@@ -230,7 +230,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       )}
 
       <div 
-        className={`fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 z-[60] bg-black/60 transition-opacity duration-300 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={onClose}
       />
       <aside 
