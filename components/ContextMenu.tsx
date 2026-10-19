@@ -85,7 +85,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, items, onClose, targetE
             left: adjustedX, 
             top: adjustedY, 
             zIndex: 10001,
-            backgroundColor: isBackgroundDark ? 'rgba(15, 15, 15, 0.5)' : 'rgba(255, 255, 255, 0.5)'
+            backgroundColor: isBackgroundDark ? 'rgb(10, 15, 20)' : 'rgba(255, 255, 255)'
           }}
           className={`absolute w-44 glass-menu rounded-2xl border shadow-2xl overflow-hidden py-2 ${isBackgroundDark ? 'border-white/10' : 'border-black/10'}`}
           onClick={(e) => e.stopPropagation()}
@@ -112,14 +112,14 @@ const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, items, onClose, targetE
                   onClose();
                 }
               }}
-              className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors text-left
+              className={`w-full flex items-center gap-2.5 px-3.5 py-2 text-xs transition-colors text-left
                 ${item.variant === 'danger' 
                   ? (isBackgroundDark ? 'text-red-400 hover:bg-red-500/10' : 'text-red-600 hover:bg-red-500/5')
                   : (isBackgroundDark ? 'text-white/90 hover:bg-white/5' : 'text-black/80 hover:bg-black/5')
                 }`}
             >
-              {item.icon && <span className="opacity-70">{item.icon}</span>}
-              <span className="font-medium">{item.label}</span>
+              {item.icon && <span className="opacity-70 flex-shrink-0 text-xs">{item.icon}</span>}
+              <span className="font-medium text-xs truncate">{item.label}</span>
             </button>
           ))}
         </motion.div>
