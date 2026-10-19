@@ -15,6 +15,8 @@ export interface AgentConfig {
   lastPapTimestamp?: number;
   imageModel?: string;
   callModel?: string;
+  blur?: number;
+  transparency?: number;
 }
 
 export interface Attachment {
