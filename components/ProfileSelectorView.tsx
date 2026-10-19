@@ -265,9 +265,7 @@ const ProfileSelectorView: React.FC<ProfileSelectorViewProps> = ({
           style={{
             background: isBackgroundDark 
               ? `rgba(10, 15, 20, ${(appearance?.transparency ?? 0) / 100})`
-              : `rgba(255, 255, 255, ${(appearance?.transparency ?? 0) / 100})`,
-            backdropFilter: (appearance?.blur ?? 40) === 0 ? 'none' : `blur(${appearance?.blur ?? 40}px)`,
-            WebkitBackdropFilter: (appearance?.blur ?? 40) === 0 ? 'none' : `blur(${appearance?.blur ?? 40}px)`
+              : `rgba(255, 255, 255, ${(appearance?.transparency ?? 0) / 100})`
           }}
         >
           <div className="flex items-center justify-between mb-4">
@@ -302,9 +300,7 @@ const ProfileSelectorView: React.FC<ProfileSelectorViewProps> = ({
                 <div 
                   className={`absolute right-0 mt-2 w-56 rounded-2xl shadow-2xl border ${themeBorderColor} z-[101] overflow-hidden animate-in slide-in-from-top-2 duration-200 origin-top-right glass-menu`}
                   style={{ 
-                    backgroundColor: isBackgroundDark ? 'rgba(15, 15, 15, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-                    backdropFilter: 'blur(40px)',
-                    WebkitBackdropFilter: 'blur(40px)'
+                    backgroundColor: isBackgroundDark ? 'rgba(15, 15, 15, 0.95)' : 'rgba(255, 255, 255, 0.95)'
                   }}
                 >
                   <div className="p-2 space-y-1">

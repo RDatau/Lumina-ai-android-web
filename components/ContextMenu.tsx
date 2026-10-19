@@ -85,9 +85,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, items, onClose, targetE
             left: adjustedX, 
             top: adjustedY, 
             zIndex: 10001,
-            backgroundColor: isBackgroundDark ? 'rgba(15, 15, 15, 0.5)' : 'rgba(255, 255, 255, 0.5)',
-            backdropFilter: 'blur(40px)',
-            WebkitBackdropFilter: 'blur(40px)'
+            backgroundColor: isBackgroundDark ? 'rgba(15, 15, 15, 0.5)' : 'rgba(255, 255, 255, 0.5)'
           }}
           className={`absolute w-44 glass-menu rounded-2xl border shadow-2xl overflow-hidden py-2 ${isBackgroundDark ? 'border-white/10' : 'border-black/10'}`}
           onClick={(e) => e.stopPropagation()}

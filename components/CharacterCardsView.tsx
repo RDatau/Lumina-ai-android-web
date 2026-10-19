@@ -229,7 +229,7 @@ const CharacterCardsView: React.FC<CharacterCardsViewProps> = ({
       {/* Drag Overlay */}
       {isDraggingBg && (
         <div className="absolute inset-0 z-[100] flex items-center justify-center p-8 pointer-events-none">
-          <div className="absolute inset-0 bg-indigo-500/20 backdrop-blur-md animate-in fade-in duration-300" />
+          <div className="absolute inset-0 bg-indigo-500/20  animate-in fade-in duration-300" />
           <div className={`relative p-12 rounded-[40px] border-4 border-dashed border-indigo-500/50 flex flex-col items-center gap-6 animate-in zoom-in duration-300 ${isBackgroundDark ? 'bg-black/60' : 'bg-white/60'}`}>
             <div className="w-24 h-24 rounded-full bg-indigo-500 flex items-center justify-center shadow-2xl shadow-indigo-500/50 animate-bounce">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -258,8 +258,6 @@ const CharacterCardsView: React.FC<CharacterCardsViewProps> = ({
                 background: isBackgroundDark 
                   ? `rgba(10, 15, 20, ${(appearance?.transparency ?? 0) / 100})`
                   : `rgba(255, 255, 255, ${(appearance?.transparency ?? 0) / 100})`,
-                backdropFilter: (appearance?.blur ?? 40) === 0 ? 'none' : `blur(${appearance?.blur ?? 40}px)`,
-                WebkitBackdropFilter: (appearance?.blur ?? 40) === 0 ? 'none' : `blur(${appearance?.blur ?? 40}px)`,
                 border: isMobile ? 'none' : (isBackgroundDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(0, 0, 0, 0.08)')
               }}
             >
@@ -427,7 +425,7 @@ const CharacterCardsView: React.FC<CharacterCardsViewProps> = ({
 
                   {/* Content - Glassmorphism style */}
                   <div className={`absolute bottom-0 left-0 right-0 p-2 pb-3 ${!isSidebar ? 'translate-y-2 group-hover:translate-y-0' : ''} transition-transform duration-500`}>
-                    <div className={`backdrop-blur-md bg-white/5 border border-white/10 rounded-xl ${isSidebar ? 'p-1.5' : 'p-2.5'} shadow-xl`}>
+                    <div className={` bg-white/5 border border-white/10 rounded-xl ${isSidebar ? 'p-1.5' : 'p-2.5'} shadow-xl`}>
                       <h3 className={`text-white ${isSidebar ? 'text-[11px]' : 'text-[13px]'} font-black tracking-wide mb-0.5 truncate drop-shadow-md`}>{profile.name}</h3>
                       {(() => {
                         const lastMsg = profile.id ? lastMessagesMap?.[profile.id] : undefined;
@@ -464,7 +462,7 @@ const CharacterCardsView: React.FC<CharacterCardsViewProps> = ({
                 {/* Menu Button (Top Right) - Repositioned for better balance */}
                 <div className="absolute top-2 right-2 z-30" ref={menuOpenId === profile.id ? menuRef : null}>
                   <button 
-                    className={`p-2.5 rounded-2xl backdrop-blur-xl transition-all duration-300 ${menuOpenId === profile.id ? 'bg-white/30 text-white scale-110' : 'bg-black/40 text-white/50 hover:text-white hover:bg-black/60 opacity-0 group-hover:opacity-100'}`}
+                    className={`p-2.5 rounded-2xl  transition-all duration-300 ${menuOpenId === profile.id ? 'bg-white/30 text-white scale-110' : 'bg-black/40 text-white/50 hover:text-white hover:bg-black/60 opacity-0 group-hover:opacity-100'}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       setMenuOpenId(menuOpenId === profile.id ? null : (profile.id || null));
@@ -479,9 +477,7 @@ const CharacterCardsView: React.FC<CharacterCardsViewProps> = ({
                     <div 
                       className={`absolute right-0 mt-2 w-44 rounded-[24px] shadow-2xl border ${themeBorderColor} z-[101] overflow-hidden animate-in fade-in zoom-in-95 duration-300 origin-top-right glass-menu`}
                       style={{ 
-                        backgroundColor: isBackgroundDark ? 'rgba(15, 15, 18, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-                        backdropFilter: 'blur(40px)',
-                        WebkitBackdropFilter: 'blur(40px)'
+                        backgroundColor: isBackgroundDark ? 'rgba(15, 15, 18, 0.95)' : 'rgba(255, 255, 255, 0.95)'
                       }}
                     >
                       <div className="p-2 flex flex-col gap-1">

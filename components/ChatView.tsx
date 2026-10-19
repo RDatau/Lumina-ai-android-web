@@ -41,7 +41,7 @@ const CodeBlockItem: React.FC<{
   const displayLang = lang?.trim() ? lang.toUpperCase() : 'PROMPT';
 
   return (
-    <div className={`my-2 rounded-2xl overflow-hidden border ${isBackgroundDark ? 'border-white/15 bg-black/60' : 'border-black/10 bg-black/80 text-white'} backdrop-blur-md shadow-xl text-left`}>
+    <div className={`my-2 rounded-2xl overflow-hidden border ${isBackgroundDark ? 'border-white/15 bg-black/60' : 'border-black/10 bg-black/80 text-white'}  shadow-xl text-left`}>
       <div className="flex items-center justify-between px-3.5 py-2 bg-white/10 border-b border-white/10 select-none">
         <div className="flex items-center gap-1.5">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-emerald-400 opacity-90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -2453,7 +2453,7 @@ const ChatView: React.FC<ChatViewProps> = ({
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
                 </svg>
             </div>
-            <span className="absolute bottom-1.5 text-[6px] font-black uppercase tracking-widest text-white/80 bg-black/40 px-1.5 py-0.5 rounded-full backdrop-blur-sm">Video</span>
+            <span className="absolute bottom-1.5 text-[6px] font-black uppercase tracking-widest text-white/80 bg-black/40 px-1.5 py-0.5 rounded-full ">Video</span>
           </div>
         ) : isAudio ? (
           <div className="w-full h-full flex flex-col items-center justify-center bg-blue-500/20 relative">
@@ -2476,7 +2476,7 @@ const ChatView: React.FC<ChatViewProps> = ({
           </div>
         )}
         {onRemove && (
-          <button onClick={(e) => { e.stopPropagation(); onRemove(); }} className="absolute top-1 right-1 p-1 bg-black/60 backdrop-blur-md rounded-lg text-white opacity-0 group-hover/att:opacity-100 transition-all hover:bg-red-500">
+          <button onClick={(e) => { e.stopPropagation(); onRemove(); }} className="absolute top-1 right-1 p-1 bg-black/60  rounded-lg text-white opacity-0 group-hover/att:opacity-100 transition-all hover:bg-red-500">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         )}
@@ -2503,7 +2503,7 @@ const ChatView: React.FC<ChatViewProps> = ({
         setActiveMessageId(deepest);
       };
       return (
-        <div className={`flex items-center gap-2 mt-2 px-3 py-1 ${isBackgroundDark ? 'bg-white/5' : 'bg-black/5'} backdrop-blur-md rounded-full border ${dynamicBorderColor} w-fit animate-in fade-in zoom-in duration-300 ${message.role === 'user' ? '' : 'self-start'}`}>
+        <div className={`flex items-center gap-2 mt-2 px-3 py-1 ${isBackgroundDark ? 'bg-white/5' : 'bg-black/5'}  rounded-full border ${dynamicBorderColor} w-fit animate-in fade-in zoom-in duration-300 ${message.role === 'user' ? '' : 'self-start'}`}>
           <button disabled={currentIndex === 0} onClick={() => switchToBranch(siblings[currentIndex - 1].id)} className={`p-1 ${isBackgroundDark ? 'hover:bg-white/10' : 'hover:bg-black/10'} rounded-full disabled:opacity-20 transition-all ${dynamicIconColor} hover:${dynamicTextColor}`}><svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg></button>
           <span className={`text-[9px] font-black tracking-widest ${dynamicMutedTextColor}`}>{currentIndex + 1} / {siblings.length}</span>
           <button disabled={currentIndex === siblings.length - 1} onClick={() => switchToBranch(siblings[currentIndex + 1].id)} className={`p-1 ${isBackgroundDark ? 'hover:bg-white/10' : 'hover:bg-black/10'} rounded-full disabled:opacity-20 transition-all ${dynamicIconColor} hover:${dynamicTextColor}`}><svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" /></svg></button>
@@ -2531,7 +2531,7 @@ const ChatView: React.FC<ChatViewProps> = ({
     if (isError) displayMessage = status.replace(/^GAGAL:\s*/, '');
 
     return (
-      <div className="fixed inset-0 z-[350] bg-black/75 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <div className="fixed inset-0 z-[350] bg-black/75  flex items-center justify-center p-4 animate-in fade-in duration-200">
         <div className={`bg-zinc-900/95 border ${isSuccess ? 'border-emerald-500/50 shadow-emerald-500/10' : isError ? 'border-red-500/50 shadow-red-500/10' : 'border-white/10'} rounded-3xl p-6 shadow-2xl flex flex-col items-center gap-4 max-w-sm w-full text-center transition-all duration-300`}>
           <div className="relative w-14 h-14 flex items-center justify-center">
             {isSuccess ? (
@@ -2678,9 +2678,7 @@ const ChatView: React.FC<ChatViewProps> = ({
                   <div 
                     className={`absolute right-0 mt-2 w-52 border rounded-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 origin-top-right z-[100] ${dynamicBorderColor} glass-menu`}
                     style={{ 
-                      backgroundColor: isBackgroundDark ? 'rgba(15, 15, 15, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-                      backdropFilter: 'blur(40px)',
-                      WebkitBackdropFilter: 'blur(40px)'
+                      backgroundColor: isBackgroundDark ? 'rgba(15, 15, 15, 0.95)' : 'rgba(255, 255, 255, 0.95)'
                     }}
                   >
                     <div className="p-1.5 flex flex-col gap-1">
@@ -2837,7 +2835,7 @@ const ChatView: React.FC<ChatViewProps> = ({
                         const dateStr = `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}_${String(d.getHours()).padStart(2, '0')}-${String(d.getMinutes()).padStart(2, '0')}-${String(d.getSeconds()).padStart(2, '0')}`;
                         const papIndex = activeThread.filter((msg, i) => i <= activeThread.indexOf(m) && msg.image).length;
                         downloadMedia(m.image!, `pap_${getSafeAgentName()}_${dateStr}_${papIndex}.png`, 'image/png'); 
-                      }} className={`p-2.5 bg-black/60 backdrop-blur-md rounded-xl text-white hover:scale-110 active:scale-95 transition-all border ${m.role === 'user' ? dynamicBorderColor : 'border-white/20'}`} title="Unduh Gambar"><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg></button>
+                      }} className={`p-2.5 bg-black/60  rounded-xl text-white hover:scale-110 active:scale-95 transition-all border ${m.role === 'user' ? dynamicBorderColor : 'border-white/20'}`} title="Unduh Gambar"><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg></button>
 
                       <button onClick={(e) => { 
                         e.stopPropagation(); 
@@ -2850,18 +2848,18 @@ const ChatView: React.FC<ChatViewProps> = ({
                           timestamp: m.timestamp,
                           agentName: config.name
                         });
-                      }} className={`p-2.5 bg-black/60 backdrop-blur-md rounded-xl text-white hover:scale-110 active:scale-95 transition-all border ${m.role === 'user' ? dynamicBorderColor : 'border-white/20'}`} title="Informasi Gambar"><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
+                      }} className={`p-2.5 bg-black/60  rounded-xl text-white hover:scale-110 active:scale-95 transition-all border ${m.role === 'user' ? dynamicBorderColor : 'border-white/20'}`} title="Informasi Gambar"><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
 
                       <button onClick={(e) => { 
                         e.stopPropagation(); 
                         handleOpenVideoModal(m.image!, m.imagePrompt || m.outfit || m.text, m.id);
-                      }} className={`p-2.5 bg-black/60 backdrop-blur-md rounded-xl text-white hover:scale-110 active:scale-95 transition-all border ${m.role === 'user' ? dynamicBorderColor : 'border-white/20'}`} title="Buat Video (Wan 2.2 I2V)"><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg></button>
+                      }} className={`p-2.5 bg-black/60  rounded-xl text-white hover:scale-110 active:scale-95 transition-all border ${m.role === 'user' ? dynamicBorderColor : 'border-white/20'}`} title="Buat Video (Wan 2.2 I2V)"><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg></button>
                     </div>
 
                     {/* Mini Variation Navigation on Chat Bubble Image */}
                     {m.images && m.images.length > 1 && (
                       <div 
-                        className="absolute bottom-3 left-3 z-10 flex items-center gap-1 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20 text-white text-[10px] font-black uppercase shadow-xl select-none"
+                        className="absolute bottom-3 left-3 z-10 flex items-center gap-1 bg-black/75  px-2.5 py-1 rounded-full border border-white/20 text-white text-[10px] font-black uppercase shadow-xl select-none"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <button
@@ -2928,10 +2926,10 @@ const ChatView: React.FC<ChatViewProps> = ({
                         autoPlay
                         className="absolute inset-0 w-full h-full object-cover filter blur-3xl opacity-75 scale-150 transform pointer-events-none" 
                       />
-                      <div className="absolute inset-0 bg-black/40 backdrop-blur-md" />
+                      <div className="absolute inset-0 bg-black/40 " />
                     </div>
 
-                    <div className="absolute top-3 left-3 z-30 flex items-center gap-2 bg-black/50 backdrop-blur-md px-2 py-1 rounded-lg" onClick={(e) => e.stopPropagation()}>
+                    <div className="absolute top-3 left-3 z-30 flex items-center gap-2 bg-black/50  px-2 py-1 rounded-lg" onClick={(e) => e.stopPropagation()}>
                       <label className="flex items-center gap-1.5 cursor-pointer text-[9px] font-bold text-white uppercase tracking-wider">
                         <input
                           type="checkbox"
@@ -3006,7 +3004,7 @@ const ChatView: React.FC<ChatViewProps> = ({
                         const dateStr = `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
                         const timeStr = `${String(d.getHours()).padStart(2, '0')}-${String(d.getMinutes()).padStart(2, '0')}-${String(d.getSeconds()).padStart(2, '0')}`;
                         downloadMedia(m.video!, `story_${getSafeAgentName()}_${dateStr}_${timeStr}.mp4`, 'video/mp4'); 
-                      }} className={`p-2.5 bg-black/60 backdrop-blur-md rounded-xl text-white hover:scale-110 active:scale-95 transition-all border ${m.role === 'user' ? dynamicBorderColor : 'border-white/20'}`} title="Unduh Video MP4"><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg></button>
+                      }} className={`p-2.5 bg-black/60  rounded-xl text-white hover:scale-110 active:scale-95 transition-all border ${m.role === 'user' ? dynamicBorderColor : 'border-white/20'}`} title="Unduh Video MP4"><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg></button>
 
                       <button onClick={async (e) => {
                         e.stopPropagation();
@@ -3028,7 +3026,7 @@ const ChatView: React.FC<ChatViewProps> = ({
                         } finally {
                           btn.classList.remove('animate-spin');
                         }
-                      }} className={`p-2.5 bg-black/60 backdrop-blur-md rounded-xl text-white hover:scale-110 active:scale-95 transition-all border ${m.role === 'user' ? dynamicBorderColor : 'border-white/20'}`} title="Regenerate Caption / Komentar Video"><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></button>
+                      }} className={`p-2.5 bg-black/60  rounded-xl text-white hover:scale-110 active:scale-95 transition-all border ${m.role === 'user' ? dynamicBorderColor : 'border-white/20'}`} title="Regenerate Caption / Komentar Video"><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></button>
 
                       <button onClick={(e) => { 
                         e.stopPropagation(); 
@@ -3041,7 +3039,7 @@ const ChatView: React.FC<ChatViewProps> = ({
                           timestamp: m.timestamp,
                           agentName: config.name
                         });
-                      }} className={`p-2.5 bg-black/60 backdrop-blur-md rounded-xl text-white hover:scale-110 active:scale-95 transition-all border ${m.role === 'user' ? dynamicBorderColor : 'border-white/20'}`} title="Informasi Video"><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
+                      }} className={`p-2.5 bg-black/60  rounded-xl text-white hover:scale-110 active:scale-95 transition-all border ${m.role === 'user' ? dynamicBorderColor : 'border-white/20'}`} title="Informasi Video"><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
                     </div>
                   </div>
                 )}
@@ -3052,7 +3050,7 @@ const ChatView: React.FC<ChatViewProps> = ({
                       <div key={attIdx} className="relative group/chatatt">
                          <AttachmentPreview attachment={att} onPreview={() => setPreviewMedia(att)} />
                          <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover/chatatt:opacity-100 transition-all">
-                            <button onClick={(e) => { e.stopPropagation(); downloadMedia(att.data, att.name, att.mimeType); }} className={`p-1.5 bg-black/60 backdrop-blur-md rounded-lg text-white border border-white/10 ${dynamicThemeHoverBgColor}`}>
+                            <button onClick={(e) => { e.stopPropagation(); downloadMedia(att.data, att.name, att.mimeType); }} className={`p-1.5 bg-black/60  rounded-lg text-white border border-white/10 ${dynamicThemeHoverBgColor}`}>
                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
                             </button>
                          </div>
@@ -3212,7 +3210,7 @@ const ChatView: React.FC<ChatViewProps> = ({
                         <button 
                           onClick={() => handleListen(m)} 
                           disabled={(streamingAudioId !== null && streamingAudioId !== m.id) || loadingAudioId === m.id} 
-                          className={`text-[10px] font-bold uppercase py-2.5 px-6 ${isBackgroundDark ? 'bg-indigo-600 text-white' : 'bg-indigo-50 text-indigo-700'} hover:opacity-90 backdrop-blur-md border ${isBackgroundDark ? 'border-white/10' : 'border-black/5'} rounded-2xl transition-all flex items-center gap-2 disabled:opacity-50 shadow-xl shadow-black/10 active:scale-95`}
+                          className={`text-[10px] font-bold uppercase py-2.5 px-6 ${isBackgroundDark ? 'bg-indigo-600 text-white' : 'bg-indigo-50 text-indigo-700'} hover:opacity-90  border ${isBackgroundDark ? 'border-white/10' : 'border-black/5'} rounded-2xl transition-all flex items-center gap-2 disabled:opacity-50 shadow-xl shadow-black/10 active:scale-95`}
                         >
                           {loadingAudioId === m.id ? (
                             <div className="flex items-center gap-2">
@@ -3231,7 +3229,7 @@ const ChatView: React.FC<ChatViewProps> = ({
                         </button>
                       )}
                       {streamingAudioId === m.id && (
-                        <div className={`flex items-center gap-2.5 py-1.5 px-3.5 rounded-2xl border ${isBackgroundDark ? 'bg-white/10 border-white/20' : 'bg-black/10 border-black/10'} backdrop-blur-md shadow-xl animate-in fade-in zoom-in-95 duration-200`}>
+                        <div className={`flex items-center gap-2.5 py-1.5 px-3.5 rounded-2xl border ${isBackgroundDark ? 'bg-white/10 border-white/20' : 'bg-black/10 border-black/10'}  shadow-xl animate-in fade-in zoom-in-95 duration-200`}>
                           <button 
                             onClick={() => handleListen(m)} 
                             className={`w-7 h-7 rounded-full flex items-center justify-center text-white transition-all active:scale-90 shadow-md hover:opacity-90 flex-shrink-0`}
@@ -3271,7 +3269,7 @@ const ChatView: React.FC<ChatViewProps> = ({
                         </>
                       )}
                       {idx === activeThread.length - 1 && ( 
-                        <button onClick={() => handleSend(undefined, true)} disabled={isTyping} className={`text-[10px] font-bold uppercase py-2.5 px-6 ${isBackgroundDark ? 'bg-indigo-600 text-white' : 'bg-indigo-50 text-indigo-700'} hover:opacity-90 backdrop-blur-md border ${isBackgroundDark ? 'border-white/10' : 'border-black/5'} rounded-2xl transition-all flex items-center gap-2 disabled:opacity-50 shadow-xl shadow-black/10`}>
+                        <button onClick={() => handleSend(undefined, true)} disabled={isTyping} className={`text-[10px] font-bold uppercase py-2.5 px-6 ${isBackgroundDark ? 'bg-indigo-600 text-white' : 'bg-indigo-50 text-indigo-700'} hover:opacity-90  border ${isBackgroundDark ? 'border-white/10' : 'border-black/5'} rounded-2xl transition-all flex items-center gap-2 disabled:opacity-50 shadow-xl shadow-black/10`}>
                           <svg xmlns="http://www.w3.org/2000/svg" className={`h-3.5 w-3.5 ${isTyping ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357-2H15" /></svg>Coba Lagi
                         </button> 
                       )}
@@ -3326,7 +3324,7 @@ const ChatView: React.FC<ChatViewProps> = ({
                   {/* Badge Slot Info di Pojok Atas */}
                   {papSlotPreview && (
                     <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between z-20 pointer-events-none">
-                      <span className="px-2.5 py-1 rounded-full bg-black/75 backdrop-blur-md text-[8px] font-black uppercase tracking-wider text-white border border-white/20 shadow-lg flex items-center gap-1.5 animate-in fade-in zoom-in-95 duration-300">
+                      <span className="px-2.5 py-1 rounded-full bg-black/75  text-[8px] font-black uppercase tracking-wider text-white border border-white/20 shadow-lg flex items-center gap-1.5 animate-in fade-in zoom-in-95 duration-300">
                         <span className="w-1.5 h-1.5 rounded-full animate-ping" style={{ backgroundColor: themeHex }} />
                         {papSlotPreview.label}
                       </span>
@@ -3387,7 +3385,7 @@ const ChatView: React.FC<ChatViewProps> = ({
       >
         <div className="pointer-events-auto w-full flex flex-col gap-2">
           {isQuotaCooldown && (
-            <div className={`mx-auto px-4 py-2 rounded-full border border-amber-500/30 bg-amber-500/10 backdrop-blur-xl flex items-center gap-2 animate-in slide-in-from-bottom-2 duration-300 select-none`}>
+            <div className={`mx-auto px-4 py-2 rounded-full border border-amber-500/30 bg-amber-500/10  flex items-center gap-2 animate-in slide-in-from-bottom-2 duration-300 select-none`}>
               <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
               <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest">
                 Quota Exhausted (429) - Tunggu sebentar atau matikan 'Google Search' di profil ya sayang.. 💦
@@ -3395,7 +3393,7 @@ const ChatView: React.FC<ChatViewProps> = ({
             </div>
           )}
           {attachedFiles.length > 0 && (
-            <div className={`flex gap-3 overflow-x-auto pb-2 custom-scrollbar p-3 ${isBackgroundDark ? 'bg-white/5' : 'bg-black/5'} backdrop-blur-3xl rounded-[25px] border ${dynamicBorderColor} animate-in slide-in-from-bottom-4 duration-300`}>
+            <div className={`flex gap-3 overflow-x-auto pb-2 custom-scrollbar p-3 ${isBackgroundDark ? 'bg-white/5' : 'bg-black/5'}  rounded-[25px] border ${dynamicBorderColor} animate-in slide-in-from-bottom-4 duration-300`}>
               {attachedFiles.map((file, i) => (
                 <AttachmentPreview key={i} attachment={file} onRemove={() => removeAttachment(i)} />
               ))}
@@ -3461,7 +3459,7 @@ const ChatView: React.FC<ChatViewProps> = ({
       </div>
 
       {isDragging && (
-        <div className="absolute inset-0 z-[150] bg-black/60 backdrop-blur-2xl flex flex-col items-center justify-center animate-in fade-in zoom-in duration-300 pointer-events-none p-6 md:p-12">
+        <div className="absolute inset-0 z-[150] bg-black/60  flex flex-col items-center justify-center animate-in fade-in zoom-in duration-300 pointer-events-none p-6 md:p-12">
           <div 
             className={`w-full h-full rounded-[40px] md:rounded-[50px] border-4 border-dashed ${dynamicThemeBorderColor} flex flex-col items-center justify-center gap-6 shadow-[0_0_100px_rgba(var(--theme-color-rgb),0.2)]`}
             style={{ borderColor: `${themeHex}40`, backgroundColor: `${themeHex}05` }}
@@ -3485,7 +3483,7 @@ const ChatView: React.FC<ChatViewProps> = ({
 
       {showProfilePreview && (
         <div 
-          className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-3xl animate-in fade-in duration-300" 
+          className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90  animate-in fade-in duration-300" 
           onClick={handleCloseMediaModal}
           onDragOver={e => { e.preventDefault(); e.stopPropagation(); setIsDraggingProfile(true); }}
           onDragLeave={e => { e.preventDefault(); e.stopPropagation(); setIsDraggingProfile(false); }}
@@ -3511,25 +3509,25 @@ const ChatView: React.FC<ChatViewProps> = ({
             </div>
             <img src={config.profilePic || undefined} className={`w-full h-full object-cover rounded-[35px] md:rounded-[50px] shadow-2xl transition-all duration-300 ${isDraggingProfile ? 'blur-sm opacity-50' : 'opacity-100'}`} alt="Profile Full" />
             <div className="absolute top-6 right-6 flex flex-col gap-3 z-20">
-              <button onClick={handleCloseMediaModal} className="bg-white/10 backdrop-blur-md text-white p-3 rounded-2xl shadow-2xl hover:bg-white hover:text-black hover:scale-110 active:scale-95 transition-all border border-white/20" title="Tutup">
+              <button onClick={handleCloseMediaModal} className="bg-white/10  text-white p-3 rounded-2xl shadow-2xl hover:bg-white hover:text-black hover:scale-110 active:scale-95 transition-all border border-white/20" title="Tutup">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
               <button onClick={() => {
                 const now = new Date();
                 const dateStr = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()}_${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}-${String(now.getSeconds()).padStart(2, '0')}`;
                 downloadMedia(config.profilePic!, `${getSafeAgentName()}_profile_${dateStr}.png`, 'image/png');
-              }} className={`backdrop-blur-md text-white p-3 rounded-2xl shadow-2xl hover:scale-110 active:scale-95 transition-all border border-white/30`} style={{ backgroundColor: `${themeHex}CC` }} title="Download">
+              }} className={` text-white p-3 rounded-2xl shadow-2xl hover:scale-110 active:scale-95 transition-all border border-white/30`} style={{ backgroundColor: `${themeHex}CC` }} title="Download">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
               </button>
-              <button onClick={() => profileInputRef.current?.click()} className="bg-purple-600/80 backdrop-blur-md text-white p-3 rounded-2xl shadow-2xl hover:bg-purple-600 hover:scale-110 active:scale-95 transition-all border border-white/30" title="Ganti Foto">
+              <button onClick={() => profileInputRef.current?.click()} className="bg-purple-600/80  text-white p-3 rounded-2xl shadow-2xl hover:bg-purple-600 hover:scale-110 active:scale-95 transition-all border border-white/30" title="Ganti Foto">
                 <input type="file" ref={profileInputRef} className="hidden" accept="image/*" onChange={handleProfilePicChange} />
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
               </button>
-              <button onClick={() => updateAgentConfig(config.id || 'default', { profilePic: defaultProfilePic })} className="bg-orange-500/80 backdrop-blur-md text-white p-3 rounded-2xl shadow-2xl hover:bg-orange-500 hover:scale-110 active:scale-95 transition-all border border-white/30" title="Reset ke Default">
+              <button onClick={() => updateAgentConfig(config.id || 'default', { profilePic: defaultProfilePic })} className="bg-orange-500/80  text-white p-3 rounded-2xl shadow-2xl hover:bg-orange-500 hover:scale-110 active:scale-95 transition-all border border-white/30" title="Reset ke Default">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357-2H15" /></svg>
               </button>
             </div>
-            <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-md px-8 py-3 rounded-full border border-white/20 shadow-2xl">
+            <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-white/10  px-8 py-3 rounded-full border border-white/20 shadow-2xl">
                <p className="text-white font-black uppercase text-[10px] tracking-[0.5em]">{config.name}</p>
             </div>
           </div>
@@ -3538,7 +3536,7 @@ const ChatView: React.FC<ChatViewProps> = ({
 
       {showGallery && (
         <div 
-          className={`fixed inset-0 z-[250] flex flex-col sm:items-center sm:justify-center sm:p-4 ${isBackgroundDark ? 'bg-black/80' : 'bg-white/80'} backdrop-blur-2xl animate-in fade-in duration-300`} 
+          className={`fixed inset-0 z-[250] flex flex-col sm:items-center sm:justify-center sm:p-4 ${isBackgroundDark ? 'bg-black/80' : 'bg-white/80'}  animate-in fade-in duration-300`} 
           onClick={handleCloseMediaModal}
           onContextMenu={(e) => handleBgContextMenu(e)}
           onTouchStart={(e) => handleBgLongPress(e)}
@@ -3701,7 +3699,7 @@ const ChatView: React.FC<ChatViewProps> = ({
                               />
                             )}
                             <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                              <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 shadow-lg">
+                              <div className="w-10 h-10 rounded-full bg-white/20  flex items-center justify-center border border-white/30 shadow-lg">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white ml-0.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" /></svg>
                               </div>
                             </div>
@@ -3900,7 +3898,7 @@ const ChatView: React.FC<ChatViewProps> = ({
           }}
         >
           <div className="relative w-full h-full flex flex-col items-stretch overflow-hidden" onClick={e => e.stopPropagation()}>
-            <div className="w-full flex justify-between items-center bg-[#0a0f14] backdrop-blur-xl pt-[max(0.75rem,env(safe-area-inset-top))] px-4 sm:px-6 py-3 border-b border-white/10 shadow-2xl shrink-0 z-30">
+            <div className="w-full flex justify-between items-center bg-[#0a0f14]  pt-[max(0.75rem,env(safe-area-inset-top))] px-4 sm:px-6 py-3 border-b border-white/10 shadow-2xl shrink-0 z-30">
               <div className="flex flex-col">
                 <p className="text-[11px] sm:text-xs font-black uppercase tracking-[0.3em] text-white/70 truncate max-w-[200px] sm:max-w-md">{previewMedia.name}</p>
                 {currentMediaIndex !== -1 && (
@@ -3957,7 +3955,7 @@ const ChatView: React.FC<ChatViewProps> = ({
             <div className="relative w-full flex-1 min-h-0 overflow-hidden bg-[#0a0f14] flex items-center justify-center group/viewer">
                {/* 3. Text Info Progress - Melayang di tengah atas dengan opacity 50% */}
                {isRegeneratingVariation && (
-                 <div className="absolute top-4 left-1/2 -translate-x-1/2 z-40 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full border border-amber-500/40 text-amber-300 text-xs font-black shadow-2xl flex items-center gap-2 animate-pulse select-none">
+                 <div className="absolute top-4 left-1/2 -translate-x-1/2 z-40 bg-black/50  px-4 py-2 rounded-full border border-amber-500/40 text-amber-300 text-xs font-black shadow-2xl flex items-center gap-2 animate-pulse select-none">
                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping shrink-0" />
                    <span>{regeneratingStatus || 'Memproses Variasi...'}</span>
                  </div>
@@ -3972,7 +3970,7 @@ const ChatView: React.FC<ChatViewProps> = ({
                      ? sourceMsg.images.indexOf(previewMedia.data) 
                      : (sourceMsg.activeImageIndex ?? (sourceMsg.images.length - 1));
                    return (
-                     <div className="absolute bottom-4 left-4 sm:left-6 z-30 flex items-center gap-2 bg-[#0a0f14]/85 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 shadow-2xl select-none">
+                     <div className="absolute bottom-4 left-4 sm:left-6 z-30 flex items-center gap-2 bg-[#0a0f14]/85  px-3.5 py-1.5 rounded-full border border-white/20 shadow-2xl select-none">
                        <button
                          type="button"
                          onClick={(e) => {
@@ -4025,7 +4023,7 @@ const ChatView: React.FC<ChatViewProps> = ({
                    type="button"
                    onClick={(e) => { e.stopPropagation(); handleRegenerateVariation(); }}
                    disabled={isRegeneratingVariation}
-                   className={`absolute bottom-4 right-4 sm:right-6 z-30 w-11 h-11 rounded-full text-white transition-all active:scale-90 border border-white/20 shadow-2xl flex items-center justify-center cursor-pointer group backdrop-blur-md ${
+                   className={`absolute bottom-4 right-4 sm:right-6 z-30 w-11 h-11 rounded-full text-white transition-all active:scale-90 border border-white/20 shadow-2xl flex items-center justify-center cursor-pointer group  ${
                      isRegeneratingVariation ? 'bg-amber-500/40 border-amber-500/60 text-amber-300 cursor-not-allowed' : 'bg-[#0a0f14]/85 hover:bg-[#0a0f14]'
                    }`}
                    title="Regenerate Variasi Gambar Baru (Data & Prompt Sama)"
@@ -4045,7 +4043,7 @@ const ChatView: React.FC<ChatViewProps> = ({
 
                {/* Floating Playback Controls (Video) - Tepat di atas footer, menempel sudut kiri & kanan */}
                {allMediaItems[currentMediaIndex]?.type === 'video' && (
-                 <div className="absolute bottom-0 left-0 right-0 w-full bg-[#0a0f14] backdrop-blur-xl border-t border-white/10 px-4 sm:px-6 py-2.5 flex items-center gap-2.5 shadow-2xl z-30 rounded-none">
+                 <div className="absolute bottom-0 left-0 right-0 w-full bg-[#0a0f14]  border-t border-white/10 px-4 sm:px-6 py-2.5 flex items-center gap-2.5 shadow-2xl z-30 rounded-none">
                    <button 
                      onClick={(e) => { e.stopPropagation(); togglePreviewVideo(); }}
                      className="w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-90 shadow-md shrink-0 cursor-pointer"
@@ -4118,7 +4116,7 @@ const ChatView: React.FC<ChatViewProps> = ({
                {currentMediaIndex > 0 && (
                  <button 
                   onClick={(e) => { e.stopPropagation(); handlePrevMedia(); }}
-                  className="absolute left-4 sm:left-6 z-20 p-3 sm:p-4 bg-black/60 hover:bg-white/20 backdrop-blur-md rounded-full text-white opacity-70 hover:opacity-100 transition-all border border-white/10 shadow-2xl hidden md:flex items-center justify-center cursor-pointer active:scale-95"
+                  className="absolute left-4 sm:left-6 z-20 p-3 sm:p-4 bg-black/60 hover:bg-white/20  rounded-full text-white opacity-70 hover:opacity-100 transition-all border border-white/10 shadow-2xl hidden md:flex items-center justify-center cursor-pointer active:scale-95"
                  >
                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
                  </button>
@@ -4127,7 +4125,7 @@ const ChatView: React.FC<ChatViewProps> = ({
                {currentMediaIndex < allMediaItems.length - 1 && (
                  <button 
                   onClick={(e) => { e.stopPropagation(); handleNextMedia(); }}
-                  className="absolute right-4 sm:right-6 z-20 p-3 sm:p-4 bg-black/60 hover:bg-white/20 backdrop-blur-md rounded-full text-white opacity-70 hover:opacity-100 transition-all border border-white/10 shadow-2xl hidden md:flex items-center justify-center cursor-pointer active:scale-95"
+                  className="absolute right-4 sm:right-6 z-20 p-3 sm:p-4 bg-black/60 hover:bg-white/20  rounded-full text-white opacity-70 hover:opacity-100 transition-all border border-white/10 shadow-2xl hidden md:flex items-center justify-center cursor-pointer active:scale-95"
                  >
                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" /></svg>
                  </button>
@@ -4167,7 +4165,7 @@ const ChatView: React.FC<ChatViewProps> = ({
                                className="w-full h-full object-cover blur-2xl md:blur-3xl opacity-50 scale-125 saturate-150 transition-all duration-500"
                                aria-hidden="true"
                              />
-                             <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" />
+                             <div className="absolute inset-0 bg-black/30 ]" />
                            </div>
                          )}
 
@@ -4184,7 +4182,7 @@ const ChatView: React.FC<ChatViewProps> = ({
                          />
 
                          {/* Floating Zoom & Pan Controls - Menyesuaikan posisi Mobile & Desktop */}
-                         <div className="absolute top-4 right-4 sm:top-4 sm:right-6 z-30 flex items-center gap-1.5 bg-[#0a0f14]/85 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 shadow-2xl">
+                         <div className="absolute top-4 right-4 sm:top-4 sm:right-6 z-30 flex items-center gap-1.5 bg-[#0a0f14]/85  px-3 py-1.5 rounded-full border border-white/20 shadow-2xl">
                            <span className="text-[10px] font-black text-white px-2 py-0.5 rounded-full bg-white/10 font-mono">
                              {Math.round(mediaZoomScale * 100)}%
                            </span>
@@ -4232,13 +4230,13 @@ const ChatView: React.FC<ChatViewProps> = ({
                                    playsInline
                                  />
                                )}
-                               <div className="absolute inset-0 bg-black/25 backdrop-blur-[1px]"></div>
+                               <div className="absolute inset-0 bg-black/25 ]"></div>
                              </div>
                            )}
 
                            {/* Floating Ambient Glow Toggle Control (Video) - Menyesuaikan Mobile & Desktop Wide */}
                            <div 
-                             className="absolute top-4 right-4 sm:top-4 sm:right-6 z-30 flex items-center gap-2 bg-[#0a0f14]/85 hover:bg-[#0a0f14] backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 shadow-2xl transition-all select-none"
+                             className="absolute top-4 right-4 sm:top-4 sm:right-6 z-30 flex items-center gap-2 bg-[#0a0f14]/85 hover:bg-[#0a0f14]  px-3 py-1.5 rounded-full border border-white/20 shadow-2xl transition-all select-none"
                              onClick={(e) => e.stopPropagation()}
                            >
                              <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-white/90">
@@ -4377,7 +4375,7 @@ const ChatView: React.FC<ChatViewProps> = ({
                           )}
 
                           {/* Floating Playback Controls */}
-                          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[30px] p-4 flex flex-col gap-3 shadow-2xl z-20">
+                          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-white/10  border border-white/20 rounded-[30px] p-4 flex flex-col gap-3 shadow-2xl z-20">
                             <div className="flex items-center gap-4">
                               <button 
                                 onClick={(e) => { e.stopPropagation(); togglePreviewAudio(); }}
@@ -4450,7 +4448,7 @@ const ChatView: React.FC<ChatViewProps> = ({
 
       {showTranscript && (
         <div 
-          className={`fixed inset-0 z-[300] flex items-center justify-center p-4 ${isBackgroundDark ? 'bg-black/80' : 'bg-white/80'} backdrop-blur-2xl animate-in fade-in duration-300`} 
+          className={`fixed inset-0 z-[300] flex items-center justify-center p-4 ${isBackgroundDark ? 'bg-black/80' : 'bg-white/80'}  animate-in fade-in duration-300`} 
           onClick={() => setShowTranscript(false)}
         >
           <div 
