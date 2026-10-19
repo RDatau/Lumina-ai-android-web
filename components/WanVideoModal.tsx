@@ -794,11 +794,11 @@ export const WanVideoModal: React.FC<WanVideoModalProps> = ({
                 {isEnhancingPrompt ? (
                   <>
                     <div className="w-3.5 h-3.5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
-                    <span>Menyusun Prompt (Gemini 3.1)...</span>
+                    <span>Menyusun Prompt...</span>
                   </>
                 ) : (
                   <>
-                    <span>✨ AI Director (Gemini 3.1 Flash Lite)</span>
+                    <span>✨ AI Director</span>
                   </>
                 )}
               </button>
