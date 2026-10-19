@@ -47,19 +47,12 @@ const ElectronTitleBar: React.FC<ElectronTitleBarProps> = ({
   };
 
   const isDark = appearance?.isBackgroundDark ?? isBackgroundDark;
-  const bgAlpha = (appearance?.transparency ?? 0) / 100;
-  const blurPx = appearance?.blur ?? 40;
 
   return (
     <div 
-      className="fixed top-0 left-0 right-0 h-8 z-[9999] flex items-center justify-between px-3 select-none pointer-events-auto transition-all duration-300"
+      className={`fixed top-0 left-0 right-0 h-8 z-[9999] flex items-center justify-between px-3 select-none pointer-events-auto transition-all duration-300 ${isDark ? 'bg-[#0a0f14]' : 'bg-white'}`}
       style={{ 
         WebkitAppRegion: 'drag' as any,
-        backgroundColor: isDark 
-          ? `rgba(10, 15, 20, ${bgAlpha})` 
-          : `rgba(255, 255, 255, ${bgAlpha})`,
-        backdropFilter: `blur(${blurPx}px)`,
-        WebkitBackdropFilter: `blur(${blurPx}px)`,
         borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`
       }}
     >

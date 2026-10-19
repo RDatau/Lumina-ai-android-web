@@ -215,15 +215,13 @@ const ProfileSelectorView: React.FC<ProfileSelectorViewProps> = ({
   const themeBorderColor = isBackgroundDark ? 'border-white/10' : 'border-black/5';
   
   const glassStyles = {
-    backgroundColor: isBackgroundDark ? `rgba(10, 15, 20, ${(appearance?.transparency ?? 0) / 100})` : `rgba(255, 255, 255, ${(appearance?.transparency ?? 0) / 100})`,
-    backdropFilter: `blur(${appearance?.blur ?? 40}px)`,
-    WebkitBackdropFilter: `blur(${appearance?.blur ?? 40}px)`
+    backgroundColor: isBackgroundDark ? '#0a0f14' : '#ffffff',
+    border: isBackgroundDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)'
   };
 
   const menuGlassStyles = {
-    backgroundColor: isBackgroundDark ? 'rgba(15, 15, 15, 0.75)' : 'rgba(255, 255, 255, 0.75)',
-    backdropFilter: `blur(${appearance?.blur ?? 25}px)`,
-    WebkitBackdropFilter: `blur(${appearance?.blur ?? 25}px)`
+    backgroundColor: isBackgroundDark ? '#0a0f14' : '#ffffff',
+    border: isBackgroundDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)'
   };
 
   // Sort profiles by unread status first, then by newest incoming message timestamp descending

@@ -8,8 +8,6 @@ export interface AgentConfig {
   voiceCall?: string;
   profilePic: string | null;
   background: string;
-  blur: number;
-  transparency: number;
   isEnrichPersonaEnabled?: boolean;
   enrichedPersona?: string;
   currentOutfit?: string;
@@ -136,8 +134,6 @@ export interface UserProfile {
 
 export interface GlobalAppearance {
   background: string;
-  blur: number;
-  transparency: number;
   isBackgroundDark: boolean;
   accentColor?: string;
   accentColorMode?: 'manual' | 'wallpaper' | 'default';

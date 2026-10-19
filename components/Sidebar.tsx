@@ -234,17 +234,12 @@ const Sidebar: React.FC<SidebarProps> = ({
         onClick={onClose}
       />
       <aside 
-        className={`fixed top-0 left-0 h-full w-[300px] z-[70] shadow-2xl transition-transform duration-500 ease-out border-r ${dynamicBorderColor} overflow-hidden flex flex-col ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
-        style={{ 
-          backgroundColor: isBackgroundDark ? `rgba(0, 0, 0, ${(appearance?.transparency ?? 0) / 100})` : `rgba(255, 255, 255, ${(appearance?.transparency ?? 0) / 100})`,
-          backdropFilter: `blur(${appearance?.blur ?? 40}px)`,
-          WebkitBackdropFilter: `blur(${appearance?.blur ?? 40}px)`
-        }}
+        className={`fixed top-0 left-0 h-full w-[300px] z-[70] shadow-2xl transition-transform duration-500 ease-out border-r ${dynamicBorderColor} overflow-hidden flex flex-col ${isOpen ? 'translate-x-0' : '-translate-x-full'} ${isBackgroundDark ? 'bg-[#0a0f14]' : 'bg-white'}`}
       >
         <div className="p-6 flex flex-col h-full relative">
           {/* Internal Sidebar Loading Indicator */}
           {isDataActionLoading && (
-            <div className={`absolute inset-0 z-[100] ${isBackgroundDark ? 'bg-black/40' : 'bg-white/40'} backdrop-blur-md flex flex-col items-center justify-center gap-4`}>
+            <div className={`absolute inset-0 z-[100] ${isBackgroundDark ? 'bg-black/90' : 'bg-white/90'} flex flex-col items-center justify-center gap-4`}>
               <div 
                 className={`w-10 h-10 border-4 ${isBackgroundDark ? 'border-white/10' : 'border-black/10'} rounded-full animate-spin`}
                 style={{ borderTopColor: themeHex }}

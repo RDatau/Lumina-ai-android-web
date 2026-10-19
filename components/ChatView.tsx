@@ -1756,9 +1756,7 @@ const ChatView: React.FC<ChatViewProps> = ({
   const dynamicThemeHoverBorderColor = `hover:border-[${themeHex}]/40`;
 
   const glassStyles = {
-    backgroundColor: isBackgroundDark ? `rgba(10, 15, 20, ${(appearance?.transparency ?? 0) / 100})` : `rgba(255, 255, 255, ${(appearance?.transparency ?? 0) / 100})`,
-    backdropFilter: `blur(${appearance?.blur ?? 40}px)`,
-    WebkitBackdropFilter: `blur(${appearance?.blur ?? 40}px)`,
+    backgroundColor: isBackgroundDark ? '#0a0f14' : '#ffffff',
     border: isBackgroundDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid rgba(0, 0, 0, 0.1)'
   };
 
@@ -1769,9 +1767,7 @@ const ChatView: React.FC<ChatViewProps> = ({
   };
 
   const agentGlassStyles = {
-    backgroundColor: isBackgroundDark ? `rgba(10, 15, 20, ${(appearance?.transparency ?? 0) / 100})` : `rgba(255, 255, 255, ${(appearance?.transparency ?? 0) / 100})`,
-    backdropFilter: `blur(${appearance?.blur ?? 40}px)`,
-    WebkitBackdropFilter: `blur(${appearance?.blur ?? 40}px)`,
+    backgroundColor: isBackgroundDark ? '#0a0f14' : '#ffffff',
     border: isBackgroundDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid rgba(0, 0, 0, 0.1)',
     color: isBackgroundDark ? 'white' : 'black'
   };

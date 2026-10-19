@@ -188,17 +188,12 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const themeTextClass = themeContrastColor === 'black' ? 'text-black' : 'text-white';
 
   const glassStyles = {
-    backgroundColor: isDark ? `rgba(10, 15, 20, ${(appearance?.transparency ?? 0) / 100})` : `rgba(255, 255, 255, ${(appearance?.transparency ?? 0) / 100})`,
-    backdropFilter: (appearance?.blur ?? 40) === 0 ? 'none' : `blur(${appearance?.blur ?? 40}px)`,
-    WebkitBackdropFilter: (appearance?.blur ?? 40) === 0 ? 'none' : `blur(${appearance?.blur ?? 40}px)`
+    backgroundColor: isDark ? '#0a0f14' : '#ffffff',
+    border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)'
   };
 
   const headerStyle = {
-    background: isDark 
-      ? `rgba(10, 15, 20, ${(appearance?.transparency ?? 0) / 100})`
-      : `rgba(255, 255, 255, ${(appearance?.transparency ?? 0) / 100})`,
-    backdropFilter: (appearance?.blur ?? 40) === 0 ? 'none' : `blur(${appearance?.blur ?? 40}px)`,
-    WebkitBackdropFilter: (appearance?.blur ?? 40) === 0 ? 'none' : `blur(${appearance?.blur ?? 40}px)`
+    backgroundColor: isDark ? '#0a0f14' : '#ffffff'
   };
 
   const contentNode = (

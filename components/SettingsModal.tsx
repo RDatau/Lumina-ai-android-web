@@ -293,9 +293,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   const voiceChatOptions = isGemini38Tts ? gemini38VoiceOptions : standardVoiceOptions;
 
   const glassStyles = {
-    backgroundColor: isBackgroundDark ? `rgba(10, 15, 20, ${(appearance?.transparency ?? 0) / 100})` : `rgba(255, 255, 255, ${(appearance?.transparency ?? 0) / 100})`,
-    backdropFilter: `blur(${appearance?.blur ?? 40}px)`,
-    WebkitBackdropFilter: `blur(${appearance?.blur ?? 40}px)`
+    backgroundColor: isBackgroundDark ? '#0a0f14' : '#ffffff',
+    border: isBackgroundDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)'
   };
 
   const contentNode = (
@@ -401,14 +400,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
         {/* MOBILE HEADER (Visible on small screens only) */}
         <div 
-          className="px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2.5 border-none flex flex-col select-none md:hidden flex-shrink-0 shadow-lg"
-          style={{
-            background: isBackgroundDark 
-              ? `rgba(10, 15, 20, ${(appearance?.transparency ?? 0) / 100})`
-              : `rgba(255, 255, 255, ${(appearance?.transparency ?? 0) / 100})`,
-            backdropFilter: (appearance?.blur ?? 40) === 0 ? 'none' : `blur(${appearance?.blur ?? 40}px)`,
-            WebkitBackdropFilter: (appearance?.blur ?? 40) === 0 ? 'none' : `blur(${appearance?.blur ?? 40}px)`
-          }}
+          className={`px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2.5 border-none flex flex-col select-none md:hidden flex-shrink-0 shadow-lg ${isBackgroundDark ? 'bg-[#0a0f14]' : 'bg-white'}`}
         >
           <div className="flex items-center justify-between mb-2.5 min-h-[32px]">
             <div className="flex items-center gap-3 min-w-0">
@@ -694,40 +686,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                       </button>
                     </div>
 
-                    {/* Blur Slider */}
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center select-none">
-                        <label className={`text-[9px] font-black ${dynamicMutedTextColor} uppercase tracking-wider`}>Kekuatan Blur</label>
-                        <span className={`text-[11px] font-mono font-bold ${dynamicTextColor}`}>{appearance?.blur ?? 40}px</span>
-                      </div>
-                      <input 
-                        type="range" 
-                        min="0" 
-                        max="40" 
-                        className={`w-full h-1.5 ${isBackgroundDark ? 'bg-white/10' : 'bg-black/10'} rounded-full appearance-none cursor-pointer`} 
-                        style={{ accentColor: themeHex }}
-                        value={appearance?.blur ?? 40} 
-                        onChange={(e) => setAppearance({...appearance, blur: parseInt(e.target.value)})} 
-                      />
                     </div>
-                    
-                    {/* Transparency Slider */}
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center select-none">
-                        <label className={`text-[9px] font-black ${dynamicMutedTextColor} uppercase tracking-wider`}>Transparansi Kaca</label>
-                        <span className={`text-[11px] font-mono font-bold ${dynamicTextColor}`}>{appearance?.transparency ?? 0}%</span>
-                      </div>
-                      <input 
-                        type="range" 
-                        min="0" 
-                        max="100" 
-                        className={`w-full h-1.5 ${isBackgroundDark ? 'bg-white/10' : 'bg-black/10'} rounded-full appearance-none cursor-pointer`} 
-                        style={{ accentColor: themeHex }}
-                        value={appearance?.transparency ?? 0} 
-                        onChange={(e) => setAppearance({...appearance, transparency: parseInt(e.target.value)})} 
-                      />
-                    </div>
-                  </div>
 
                   {/* Backup & Restore Card */}
                   <div className={`p-4 rounded-2xl border ${dynamicBorderColor} ${isBackgroundDark ? 'bg-white/5' : 'bg-black/5'} space-y-3`}>
@@ -790,12 +749,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 <div className="space-y-4">
                   {/* Global Indicator Banner */}
                   <div 
-                    className={`p-3 rounded-xl border ${dynamicBorderColor} flex items-center gap-3 shadow-sm`}
-                    style={{
-                      backgroundColor: isBackgroundDark ? `rgba(10, 15, 20, ${(appearance?.transparency ?? 0) / 100})` : `rgba(255, 255, 255, ${(appearance?.transparency ?? 0) / 100})`,
-                      backdropFilter: (appearance?.blur ?? 40) === 0 ? 'none' : `blur(${appearance?.blur ?? 40}px)`,
-                      WebkitBackdropFilter: (appearance?.blur ?? 40) === 0 ? 'none' : `blur(${appearance?.blur ?? 40}px)`
-                    }}
+                    className={`p-3 rounded-xl border ${dynamicBorderColor} flex items-center gap-3 shadow-sm ${isBackgroundDark ? 'bg-[#0a0f14]' : 'bg-white'}`}
                   >
                     <div className="p-2 rounded-lg bg-indigo-500/20 text-indigo-400 flex-shrink-0">
                       <Globe className="w-4 h-4 animate-pulse" />

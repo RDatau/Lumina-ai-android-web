@@ -253,8 +253,6 @@ const App: React.FC = () => {
   }, []);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isAppearanceOpen, setIsAppearanceOpen] = useState(false);
-  const [isUserProfileOpen, setIsUserProfileOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [activeMessageId, setActiveMessageId] = useState<string | null>(null);
   const [sessions, setSessions] = useState<ChatSession[]>([]);
@@ -369,8 +367,6 @@ const App: React.FC = () => {
     voice: 'Kore',
     profilePic: LUMINA_DEFAULT_PIC,
     background: 'google-theme',
-    blur: 40,
-    transparency: 0,
   });
 
   const [isResizing, setIsResizing] = useState(false);
@@ -518,8 +514,6 @@ const App: React.FC = () => {
   const [isBackgroundDark, setIsBackgroundDark] = useState(true);
   const [appearance, setAppearance] = useState<GlobalAppearance>({
     background: 'google-theme',
-    blur: 40,
-    transparency: 0,
     isBackgroundDark: true,
     showFloatingProgress: true
   });
@@ -1749,24 +1743,7 @@ const App: React.FC = () => {
         appearance={appearance}
       />
 
-      <SettingsModal userProfile={userProfile} setUserProfile={setUserProfile}  
-        isOpen={isAppearanceOpen}
-        onClose={() => setIsAppearanceOpen(false)}
-        appearance={appearance}
-        setAppearance={setAppearance}
-        themeHex={themeHex}
-      />
-      {isUserProfileOpen && (
-        <UserProfileModal
-          isOpen={isUserProfileOpen}
-          onClose={() => setIsUserProfileOpen(false)}
-          profile={userProfile}
-          onSave={handleSaveUserProfile}
-          onLoadGlobal={handleLoadGlobalProfile}
-          appearance={appearance}
-          themeHex={themeHex}
-        />
-      )}
+
 
       <Sidebar 
         isOpen={isSidebarOpen} 
@@ -1784,7 +1761,7 @@ const App: React.FC = () => {
         isBackgroundDark={appearance.isBackgroundDark}
         themeHex={themeHex}
         onOpenAppearance={() => {
-          setIsAppearanceOpen(true);
+          handleNavigate(AppState.SETTINGS);
           setIsSidebarOpen(false);
         }}
         appearance={appearance}
@@ -1816,11 +1793,8 @@ const App: React.FC = () => {
           <>
             {/* Desktop Side Navigation Rail */}
             <div 
-              className={`hidden md:flex w-16 md:w-20 flex-shrink-0 h-full flex-col items-center pt-4 pb-8 gap-6 border-r z-40 relative transition-all duration-500`}
+              className={`hidden md:flex w-16 md:w-20 flex-shrink-0 h-full flex-col items-center pt-4 pb-8 gap-6 border-r z-40 relative transition-all duration-500 ${appearance.isBackgroundDark ? 'bg-[#0a0f14]' : 'bg-white'}`}
               style={{
-                backgroundColor: appearance.isBackgroundDark ? `rgba(10, 15, 20, ${(appearance?.transparency ?? 0) / 100})` : `rgba(255, 255, 255, ${(appearance?.transparency ?? 0) / 100})`,
-                backdropFilter: `blur(${appearance?.blur ?? 40}px)`,
-                WebkitBackdropFilter: `blur(${appearance?.blur ?? 40}px)`,
                 borderColor: appearance.isBackgroundDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'
               }}
             >
@@ -1875,7 +1849,7 @@ const App: React.FC = () => {
               {/* Bottom Rail Icons */}
               <div className="flex flex-col items-center gap-4 pb-4">
                 <button 
-                  onClick={() => setIsAppearanceOpen(true)}
+                  onClick={() => handleNavigate(AppState.SETTINGS)}
                   className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all ${appearance.isBackgroundDark ? 'text-white/30 hover:text-white/60 hover:bg-white/5' : 'text-black/30 hover:text-black/60 hover:bg-black/5'}`}
                   title="Pengaturan"
                 >
@@ -1886,7 +1860,7 @@ const App: React.FC = () => {
                 </button>
                 
                 <button 
-                  onClick={() => setIsUserProfileOpen(true)}
+                  onClick={() => handleNavigate(AppState.USER_PROFILE)}
                   className="w-10 h-10 rounded-full overflow-hidden border-2 border-white/10 shadow-lg cursor-pointer hover:scale-110 transition-all flex items-center justify-center bg-zinc-800"
                   title="Profil Saya"
                 >
@@ -1908,12 +1882,9 @@ const App: React.FC = () => {
 
             {/* Mobile Bottom Navigation Bar */}
             <div 
-              className={`md:hidden fixed left-4 right-4 h-[72px] flex items-center justify-around z-50 transition-all duration-500 px-2 rounded-[32px] border shadow-2xl ${appState === AppState.CHAT || (appState === AppState.SETUP && messages.length > 0) ? 'translate-y-[150%] opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}
+              className={`md:hidden fixed left-4 right-4 h-[72px] flex items-center justify-around z-50 transition-all duration-500 px-2 rounded-[32px] border shadow-2xl ${appearance.isBackgroundDark ? 'bg-[#0a0f14]' : 'bg-white'} ${appState === AppState.CHAT || (appState === AppState.SETUP && messages.length > 0) ? 'translate-y-[150%] opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}
               style={{
                 bottom: 'calc(1.5rem + env(safe-area-inset-bottom))',
-                backgroundColor: appearance.isBackgroundDark ? `rgba(10, 15, 20, ${(appearance?.transparency ?? 0) / 100})` : `rgba(255, 255, 255, ${(appearance?.transparency ?? 0) / 100})`,
-                backdropFilter: `blur(${appearance?.blur ?? 40}px)`,
-                WebkitBackdropFilter: `blur(${appearance?.blur ?? 40}px)`,
                 borderColor: appearance.isBackgroundDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
               }}
             >
@@ -1957,13 +1928,13 @@ const App: React.FC = () => {
                 className={`flex flex-col items-center gap-1.5 transition-all flex-1 py-2`}
                 onClick={() => handleNavigate(AppState.SETTINGS)}
               >
-                <div className={`w-[64px] h-[32px] flex items-center justify-center rounded-2xl transition-all ${appState === AppState.SETTINGS || isAppearanceOpen ? (appearance.isBackgroundDark ? 'bg-white/10 text-white' : 'bg-black/10 text-black') : (appearance.isBackgroundDark ? 'text-white/40' : 'text-black/40')}`}>
+                <div className={`w-[64px] h-[32px] flex items-center justify-center rounded-2xl transition-all ${appState === AppState.SETTINGS ? (appearance.isBackgroundDark ? 'bg-white/10 text-white' : 'bg-black/10 text-black') : (appearance.isBackgroundDark ? 'text-white/40' : 'text-black/40')}`}>
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </div>
-                <span className={`text-[10px] font-black uppercase tracking-[0.1em] ${appState === AppState.SETTINGS || isAppearanceOpen ? (appearance.isBackgroundDark ? 'text-white' : 'text-black') : (appearance.isBackgroundDark ? 'text-white/40' : 'text-black/40')}`}>Pengaturan</span>
+                <span className={`text-[10px] font-black uppercase tracking-[0.1em] ${appState === AppState.SETTINGS ? (appearance.isBackgroundDark ? 'text-white' : 'text-black') : (appearance.isBackgroundDark ? 'text-white/40' : 'text-black/40')}`}>Pengaturan</span>
               </button>
 
               {/* Profile Button */}
@@ -1971,7 +1942,7 @@ const App: React.FC = () => {
                 className={`flex flex-col items-center gap-1.5 transition-all flex-1 py-2`}
                 onClick={() => handleNavigate(AppState.USER_PROFILE)}
               >
-                <div className={`w-[64px] h-[32px] flex items-center justify-center rounded-2xl transition-all ${appState === AppState.USER_PROFILE || isUserProfileOpen ? (appearance.isBackgroundDark ? 'bg-white/10 text-white' : 'bg-black/10 text-black') : (appearance.isBackgroundDark ? 'text-white/40' : 'text-black/40')}`}>
+                <div className={`w-[64px] h-[32px] flex items-center justify-center rounded-2xl transition-all ${appState === AppState.USER_PROFILE ? (appearance.isBackgroundDark ? 'bg-white/10 text-white' : 'bg-black/10 text-black') : (appearance.isBackgroundDark ? 'text-white/40' : 'text-black/40')}`}>
                   {userProfile.profilePic ? (
                     <div className="w-5 h-5 rounded-full overflow-hidden border border-white/20">
                       <img src={userProfile.profilePic} alt="User" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
@@ -1982,7 +1953,7 @@ const App: React.FC = () => {
                     </svg>
                   )}
                 </div>
-                <span className={`text-[10px] font-black uppercase tracking-[0.1em] ${appState === AppState.USER_PROFILE || isUserProfileOpen ? (appearance.isBackgroundDark ? 'text-white' : 'text-black') : (appearance.isBackgroundDark ? 'text-white/40' : 'text-black/40')}`}>Profil</span>
+                <span className={`text-[10px] font-black uppercase tracking-[0.1em] ${appState === AppState.USER_PROFILE ? (appearance.isBackgroundDark ? 'text-white' : 'text-black') : (appearance.isBackgroundDark ? 'text-white/40' : 'text-black/40')}`}>Profil</span>
               </button>
             </div>
           </>
@@ -2026,7 +1997,7 @@ const App: React.FC = () => {
             onConfirmAction={(msg, onConfirm) => setConfirmDialog({ message: msg, onConfirm })}
             onRestoreClick={handleRestore}
             onExportClick={handleExportProfile}
-            onOpenAppearance={() => setIsAppearanceOpen(true)}
+            onOpenAppearance={() => handleNavigate(AppState.SETTINGS)}
             onNavigate={(state) => handleNavigate(state as AppState)}
             appearance={appearance}
             isBackgroundDark={appearance.isBackgroundDark}
@@ -2051,7 +2022,7 @@ const App: React.FC = () => {
                 handleNavigate(AppState.CHAT);
               }}
               onBack={() => handleNavigate(AppState.CHARACTER_CARDS)}
-              onOpenAppearance={() => setIsAppearanceOpen(true)}
+              onOpenAppearance={() => handleNavigate(AppState.SETTINGS)}
               appearance={appearance}
               onBackup={handleBackup}
               onRestore={triggerRestore}
@@ -2104,7 +2075,7 @@ const App: React.FC = () => {
                 appearance={appearance}
                 appState={appState}
                 activeGenerations={activeGenerations}
-                onOpenAppearance={() => setIsAppearanceOpen(true)}
+                onOpenAppearance={() => handleNavigate(AppState.SETTINGS)}
                 onBackup={handleBackup}
                 onRestore={triggerRestore}
                 onGlobalBackup={handleGlobalBackup}
@@ -2171,7 +2142,7 @@ const App: React.FC = () => {
                 addMessageToAgent={addMessageToAgent}
                 updateUserProfileForAgent={updateUserProfileForAgent}
                 updateAgentConfig={updateAgentConfig}
-                onOpenAppearance={() => setIsAppearanceOpen(true)}
+                onOpenAppearance={() => handleNavigate(AppState.SETTINGS)}
                 appearance={appearance}
                 defaultProfilePic={LUMINA_DEFAULT_PIC}
                 isBackgroundDark={appearance.isBackgroundDark}
@@ -2181,7 +2152,7 @@ const App: React.FC = () => {
                 onLongPress={handleTouchStart}
                 onGlobalTouchMove={handleTouchMove}
                 onGlobalTouchEnd={handleTouchEnd}
-                onOpenProfile={() => setIsUserProfileOpen(true)}
+                onOpenProfile={() => handleNavigate(AppState.USER_PROFILE)}
                 onOpenGallery={() => {}} 
                 activeGenerations={activeGenerations}
                 onStartGeneration={handleStartGeneration}
@@ -2209,7 +2180,7 @@ const App: React.FC = () => {
               onExport={handleExportProfile}
               onRestore={triggerRestore}
               onNavigate={(state) => handleNavigate(state as AppState)}
-              onOpenAppearance={() => setIsAppearanceOpen(true)}
+              onOpenAppearance={() => handleNavigate(AppState.SETTINGS)}
               appearance={appearance}
               onNew={() => {
                 const newId = Date.now().toString();
@@ -2220,8 +2191,6 @@ const App: React.FC = () => {
                   voice: 'Kore',
                   profilePic: LUMINA_DEFAULT_PIC,
                   background: 'google-theme',
-                  blur: 40,
-                  transparency: 0,
                 };
                 setConfig(newProfile);
                 handleNavigate(AppState.SETUP);
@@ -2230,7 +2199,7 @@ const App: React.FC = () => {
               onLongPress={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
-              onOpenProfile={() => setIsUserProfileOpen(true)}
+              onOpenProfile={() => handleNavigate(AppState.USER_PROFILE)}
             />
           </div>
         )}
@@ -2255,7 +2224,10 @@ const App: React.FC = () => {
               isEmbeddedPage={true}
               onClose={() => handleNavigate(AppState.PROFILE_SELECT)}
               profile={userProfile}
-              onSave={handleSaveUserProfile}
+              onSave={async (p) => {
+                await handleSaveUserProfile(p);
+                handleNavigate(AppState.PROFILE_SELECT);
+              }}
               onLoadGlobal={handleLoadGlobalProfile}
               appearance={appearance}
               themeHex={themeHex}

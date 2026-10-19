@@ -105,9 +105,7 @@ const SetupView: React.FC<SetupViewProps> = ({
         name: 'Karakter Baru',
         personality: '',
         profilePic: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&q=80&w=600',
-        background: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=600',
-        blur: 40,
-        transparency: 0
+        background: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=600'
       });
     } else {
       const selected = profiles.find(p => p.id === profileId);

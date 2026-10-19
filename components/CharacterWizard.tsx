@@ -65,8 +65,6 @@ const CharacterWizard: React.FC<CharacterWizardProps> = ({ onBack, onAdd, userPr
       profilePic: generatedData.profilePic,
       voice: 'Kore',
       background: 'google-theme',
-      blur: 40,
-      transparency: 0,
       isEnrichPersonaEnabled: false
     };
 
