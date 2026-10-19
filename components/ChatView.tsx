@@ -2783,7 +2783,7 @@ const ChatView: React.FC<ChatViewProps> = ({
           <div 
             className="sticky z-30 flex justify-center pointer-events-none mb-4 animate-in fade-in zoom-in-95 duration-200"
             style={{ 
-              top: typeof window !== 'undefined' && window.innerWidth >= 768 ? '-13px' : '-27px'
+              top: typeof window !== 'undefined' && window.innerWidth >= 768 ? '-19px' : '-29px'
             }}
           >
             <div 
