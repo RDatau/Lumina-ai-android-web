@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { ChatMessage, CallHistory, ChatSession, AgentConfig, GlobalAppearance } from '../types';
+import { ChatMessage, CallHistory, ChatSession, AgentConfig, GlobalAppearance, ActiveGenerationTask } from '../types';
 import { dbService, FullBackup, GlobalBackup } from '../services/dbService';
 import { downloadJsonFile } from '../services/exportHelper';
 import { LogOut } from 'lucide-react';
@@ -22,6 +22,7 @@ interface SidebarProps {
   themeHex?: string;
   onOpenAppearance?: () => void;
   appearance: GlobalAppearance;
+  activeGenerations?: ActiveGenerationTask[];
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ 
@@ -41,7 +42,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   isBackgroundDark = true,
   themeHex,
   onOpenAppearance,
-  appearance
+  appearance,
+  activeGenerations = []
 }) => {
   const [copyStatus, setCopyStatus] = useState('Bagikan Aplikasi');
   const [isDataActionLoading, setIsDataActionLoading] = useState(false);
@@ -298,41 +300,73 @@ const Sidebar: React.FC<SidebarProps> = ({
                 )}
               </div>
               
-              <div className="space-y-3">
+               <div className="space-y-3">
                 {/* Active Session Preview */}
-                {messages.length > 0 && (
+                {messages.length > 0 && (() => {
+                  const activeSessionId = messages[0].sessionId || 'new_session';
+                  const isGeneratingActiveSession = activeGenerations?.some(t => t.agentId === config.id && (t.sessionId === activeSessionId || !t.sessionId));
+                  return (
                   <div 
                     className={`p-4 rounded-2xl border relative overflow-hidden group`}
                     style={{ borderColor: `${themeHex}30`, backgroundColor: `${themeHex}05` }}
                   >
-                    <div className="flex gap-3 items-start">
+                    <div className="flex gap-3 items-center">
                         <div 
-                          className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg`}
+                          className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg relative`}
                           style={{ backgroundColor: themeHex }}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white animate-pulse" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7z" clipRule="evenodd" /></svg>
+                          {isGeneratingActiveSession ? (
+                            <div className="absolute inset-0 rounded-lg animate-spin border-2 border-white border-t-transparent" />
+                          ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white animate-pulse" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7z" clipRule="evenodd" /></svg>
+                          )}
                         </div>
                         <div className="flex-1 overflow-hidden">
-                          <p className={`text-[8px] font-black uppercase mb-0.5 tracking-widest`} style={{ color: `${themeHex}99` }}>Sesi Aktif</p>
+                          <div className="flex items-center justify-between">
+                            <p className={`text-[8px] font-black uppercase mb-0.5 tracking-widest`} style={{ color: `${themeHex}99` }}>Sesi Aktif</p>
+                            {isGeneratingActiveSession && (
+                              <span className="text-[8px] font-extrabold px-1.5 py-0.5 rounded-full animate-pulse text-white" style={{ backgroundColor: themeHex }}>
+                                Proses...
+                              </span>
+                            )}
+                          </div>
                           <p className={`text-xs font-bold truncate ${isBackgroundDark ? 'text-white/90' : 'text-black/90'}`}>
                             {currentSessionTitle}
                           </p>
                         </div>
                     </div>
                   </div>
-                )}
+                );
+                })()}
 
-                {sessions.map(session => (
+                {sessions.map(session => {
+                  const isGeneratingSession = activeGenerations?.some(t => t.agentId === config.id && t.sessionId === session.id);
+                  return (
                   <div key={session.id} className="group relative">
                     <button 
                       onClick={() => onLoadSession(session)}
                       className={`w-full text-left p-3 rounded-2xl ${dynamicBgColor} border ${dynamicBorderColor} ${dynamicHoverBgColor} hover:border-white/20 transition-all flex gap-3 items-center group/btn`}
+                      style={isGeneratingSession ? { borderColor: `${themeHex}60`, backgroundColor: `${themeHex}0a` } : {}}
                     >
-                      <div className={`w-8 h-8 ${dynamicBgColor} rounded-lg flex items-center justify-center flex-shrink-0 ${dynamicMutedTextColor} group-hover/btn:${isBackgroundDark ? 'text-white/60' : 'text-black/60'} transition-colors`}>
-                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
+                      <div 
+                        className={`w-8 h-8 ${dynamicBgColor} rounded-lg flex items-center justify-center flex-shrink-0 ${dynamicMutedTextColor} group-hover/btn:${isBackgroundDark ? 'text-white/60' : 'text-black/60'} transition-colors relative`}
+                        style={isGeneratingSession ? { borderColor: themeHex, borderWidth: '1px' } : {}}
+                      >
+                         {isGeneratingSession ? (
+                           <div className="absolute inset-0 rounded-lg animate-spin border-2 border-t-transparent" style={{ borderColor: themeHex, borderTopColor: 'transparent' }} />
+                         ) : (
+                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
+                         )}
                       </div>
                       <div className="flex-1 overflow-hidden pr-6">
-                         <p className={`text-xs font-bold truncate ${isBackgroundDark ? 'text-white/60' : 'text-black/60'} group-hover/btn:${dynamicTextColor} transition-colors`}>{session.title}</p>
+                         <div className="flex items-center justify-between">
+                           <p className={`text-xs font-bold truncate ${isBackgroundDark ? 'text-white/60' : 'text-black/60'} group-hover/btn:${dynamicTextColor} transition-colors`}>{session.title}</p>
+                           {isGeneratingSession && (
+                             <span className="text-[8px] font-extrabold px-1.5 py-0.5 rounded-full animate-pulse" style={{ backgroundColor: `${themeHex}20`, color: themeHex }}>
+                               Generating...
+                             </span>
+                           )}
+                         </div>
                          <p className={`text-[9px] ${isBackgroundDark ? 'text-white/10' : 'text-black/10'} mt-0.5 font-medium`}>{new Date(session.timestamp).toLocaleDateString()}</p>
                       </div>
                     </button>
@@ -344,7 +378,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                     </button>
                   </div>
-                ))}
+                );
+                })}
               </div>
             </section>
 
