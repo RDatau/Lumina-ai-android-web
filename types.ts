@@ -147,7 +147,6 @@ export interface GlobalAppearance {
 export interface ActiveGenerationTask {
   id: string;
   agentId: string;
-  sessionId?: string;
   agentName: string;
   agentPic?: string | null;
   type: 'text' | 'pap' | 'audio' | 'video';

@@ -442,73 +442,7 @@ const App: React.FC = () => {
   };
 
   const addMessageToAgent = async (agentId: string, newMessage: ChatMessage, setActive = true) => {
-    const targetSessionId = newMessage.sessionId || 'new_session';
-    const currentActiveSessionId = messages.length > 0 ? (messages[0].sessionId || 'new_session') : 'new_session';
-    
-    // LEVEL 1: Check Agent match
-    const isSameAgent = (agentId === currentAgentIdRef.current && appStateRef.current === AppState.CHAT);
-    
-    // LEVEL 2: Check Session match
-    const isSameSession = (isSameAgent && currentActiveSessionId === targetSessionId);
-
-    if (!isSameSession) {
-      console.log(`[MultiLevelGuard] Routing background message for Agent: ${agentId}, Session: ${targetSessionId} (Active Agent: ${currentAgentIdRef.current}, Active Session: ${currentActiveSessionId})`);
-      
-      // Save in background: update target session in database & state
-      setSessions(prevSessions => {
-        const sessionIdx = prevSessions.findIndex(s => s.id === targetSessionId);
-        let updatedSessions: ChatSession[];
-        if (sessionIdx !== -1) {
-          const targetSession = prevSessions[sessionIdx];
-          const existingMsgIdx = targetSession.messages.findIndex(m => m.id === newMessage.id);
-          let newSessionMessages = existingMsgIdx !== -1 
-            ? targetSession.messages.map(m => m.id === newMessage.id ? newMessage : m)
-            : [...targetSession.messages, newMessage];
-          
-          const updatedSession = { ...targetSession, messages: newSessionMessages };
-          updatedSessions = prevSessions.map((s, idx) => idx === sessionIdx ? updatedSession : s);
-        } else {
-          const newSession: ChatSession = {
-            id: targetSessionId,
-            title: newMessage.text.substring(0, 35) + (newMessage.text.length > 35 ? '...' : ''),
-            messages: [newMessage],
-            activeMessageId: newMessage.id,
-            timestamp: Date.now()
-          };
-          updatedSessions = [newSession, ...prevSessions];
-        }
-        if (isDbReady) {
-          dbService.saveSessions(updatedSessions, agentId);
-        }
-        return updatedSessions;
-      });
-
-      if (newMessage.role === 'agent') {
-        setUnreadCountsMap(prev => {
-          const next = { ...prev, [agentId]: (prev[agentId] || 0) + 1 };
-          try { localStorage.setItem('lumina_unread_counts', JSON.stringify(next)); } catch {}
-          return next;
-        });
-        const agent = profiles.find(p => p.id === agentId);
-        if (agent && !newMessage.text.includes('Panggilan berakhir')) {
-          const notifId = Date.now().toString();
-          const isPap = !!newMessage.image;
-          setNotifications(prev => [...prev, { 
-            id: notifId, 
-            agentId, 
-            agentName: agent.name, 
-            message: isPap ? '📸 Mengirim foto baru!' : newMessage.audio ? '🎙️ Mengirim pesan suara' : newMessage.text, 
-            timestamp: Date.now() 
-          }]);
-          setTimeout(() => {
-            setNotifications(prev => prev.filter(n => n.id !== notifId));
-          }, 8000);
-        }
-      }
-      return;
-    }
-
-    // Both Agent and Session match -> Direct live display on screen
+    // 1. Always update DB first to ensure persistence
     const agentMessages = await dbService.getMessages(agentId);
     const existingIndex = agentMessages.findIndex(m => m.id === newMessage.id);
     let updatedMessages: ChatMessage[];
@@ -538,10 +472,48 @@ const App: React.FC = () => {
       [agentId]: newMessage
     }));
 
-    // ALWAYS update React messages state if this agent is the active character in config
+    const isViewingThisChat = (agentId === currentAgentIdRef.current && appStateRef.current === AppState.CHAT);
+
+    // 2. ALWAYS update React messages state if this agent is the active character in config
+    // This ensures state is never stale when user enters chat from another screen
     if (agentId === currentAgentIdRef.current) {
       setMessages(updatedMessages);
       if (setActive && existingIndex === -1) setActiveMessageId(newMessage.id);
+    }
+
+    // 3. Handle unread badge and notifications if user is not actively viewing this chat screen
+    if (!isViewingThisChat) {
+      // Increment unread count if user is on another screen or viewing another character
+      if (newMessage.role === 'agent') {
+        setUnreadCountsMap(prev => {
+          const next = { ...prev, [agentId]: (prev[agentId] || 0) + 1 };
+          try { localStorage.setItem('lumina_unread_counts', JSON.stringify(next)); } catch {}
+          return next;
+        });
+      }
+
+      // Update agentIdsWithMessages if needed
+      setAgentIdsWithMessages(prev => {
+        if (!prev.includes(agentId)) return [...prev, agentId];
+        return prev;
+      });
+
+      // Show notification
+      const agent = profiles.find(p => p.id === agentId);
+      if (agent && newMessage.role === 'agent' && !newMessage.text.includes('Panggilan berakhir')) {
+        const notifId = Date.now().toString();
+        const isPap = !!newMessage.image;
+        setNotifications(prev => [...prev, { 
+          id: notifId, 
+          agentId, 
+          agentName: agent.name, 
+          message: isPap ? '📸 Mengirim foto baru!' : newMessage.audio ? '🎙️ Mengirim pesan suara' : newMessage.text, 
+          timestamp: Date.now() 
+        }]);
+        setTimeout(() => {
+          setNotifications(prev => prev.filter(n => n.id !== notifId));
+        }, 8000);
+      }
     }
   };
   const [isBackgroundDark, setIsBackgroundDark] = useState(true);
@@ -1798,7 +1770,6 @@ const App: React.FC = () => {
           setIsSidebarOpen(false);
         }}
         appearance={appearance}
-        activeGenerations={activeGenerations}
       />
 
       {contextMenu && (

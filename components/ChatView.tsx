@@ -545,14 +545,6 @@ const ChatView: React.FC<ChatViewProps> = ({
 
   const [inputText, setInputText] = useState('');
   const chatTextareaRef = useRef<HTMLTextAreaElement>(null);
-
-  const currentActiveAgentIdRef = useRef<string>(config.id || 'default');
-  const currentActiveSessionIdRef = useRef<string>(activeThread.length > 0 ? activeThread[0].id : 'new_session');
-
-  useEffect(() => {
-    currentActiveAgentIdRef.current = config.id || 'default';
-    currentActiveSessionIdRef.current = activeThread.length > 0 ? activeThread[0].id : 'new_session';
-  }, [config.id, activeThread]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
   const [editAttachments, setEditAttachments] = useState<Attachment[]>([]);
@@ -2360,31 +2352,32 @@ const ChatView: React.FC<ChatViewProps> = ({
         sessionId: capturedSessionId
       };
       
-      const isUserElsewhere = 
-        currentActiveAgentIdRef.current !== capturedAgentId || 
-        currentActiveSessionIdRef.current !== capturedSessionId;
+      // Guard / ID Verification Check: Ensure active view matches captured request context
+      const currentActiveAgentId = config.id || 'default';
+      const currentActiveSessionId = activeThread.length > 0 ? activeThread[0].id : 'new_session';
+      const isStillInSameContext = currentActiveAgentId === capturedAgentId && currentActiveSessionId === capturedSessionId;
 
       addMessageToAgent(capturedAgentId, newAgentMsg);
 
-      if (!isUserElsewhere) {
+      if (isStillInSameContext) {
         triggerNewMessageNotification(config.name, finalDisplayText, papUrl ? 'pap' : 'text', config.profilePic);
         if (isMounted.current) {
           setIsTyping(false); 
           setLoadingType(null);
         }
       } else {
-        console.warn("[ChatView] Isolation Guard: Background generation completed, but user switched session/agent. Stored silently to target session.");
+        console.warn("[ChatView] Guard Verification: Background generation completed, but user switched agent or session. Result saved silently to target session.");
       }
       onFinishGeneration?.(capturedAgentId, papUrl ? 'pap' : 'text');
     } catch (error: any) {
       const capturedAgentId = config.id || 'default';
       const capturedSessionId = activeThread.length > 0 ? activeThread[0].id : 'new_session';
       
-      const isUserElsewhere = 
-        currentActiveAgentIdRef.current !== capturedAgentId || 
-        currentActiveSessionIdRef.current !== capturedSessionId;
+      const currentActiveAgentId = config.id || 'default';
+      const currentActiveSessionId = activeThread.length > 0 ? activeThread[0].id : 'new_session';
+      const isStillInSameContext = currentActiveAgentId === capturedAgentId && currentActiveSessionId === capturedSessionId;
 
-      if (!isUserElsewhere && isMounted.current) {
+      if (isStillInSameContext && isMounted.current) {
         setIsTyping(false);
         setLoadingType(null);
       }
