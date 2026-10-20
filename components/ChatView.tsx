@@ -2352,15 +2352,32 @@ const ChatView: React.FC<ChatViewProps> = ({
         sessionId: capturedSessionId
       };
       
+      // Guard / ID Verification Check: Ensure active view matches captured request context
+      const currentActiveAgentId = config.id || 'default';
+      const currentActiveSessionId = activeThread.length > 0 ? activeThread[0].id : 'new_session';
+      const isStillInSameContext = currentActiveAgentId === capturedAgentId && currentActiveSessionId === capturedSessionId;
+
       addMessageToAgent(capturedAgentId, newAgentMsg);
-      triggerNewMessageNotification(config.name, finalDisplayText, papUrl ? 'pap' : 'text', config.profilePic);
-      if (isMounted.current) {
-        setIsTyping(false); 
-        setLoadingType(null);
+
+      if (isStillInSameContext) {
+        triggerNewMessageNotification(config.name, finalDisplayText, papUrl ? 'pap' : 'text', config.profilePic);
+        if (isMounted.current) {
+          setIsTyping(false); 
+          setLoadingType(null);
+        }
+      } else {
+        console.warn("[ChatView] Guard Verification: Background generation completed, but user switched agent or session. Result saved silently to target session.");
       }
       onFinishGeneration?.(capturedAgentId, papUrl ? 'pap' : 'text');
     } catch (error: any) {
-      if (isMounted.current) {
+      const capturedAgentId = config.id || 'default';
+      const capturedSessionId = activeThread.length > 0 ? activeThread[0].id : 'new_session';
+      
+      const currentActiveAgentId = config.id || 'default';
+      const currentActiveSessionId = activeThread.length > 0 ? activeThread[0].id : 'new_session';
+      const isStillInSameContext = currentActiveAgentId === capturedAgentId && currentActiveSessionId === capturedSessionId;
+
+      if (isStillInSameContext && isMounted.current) {
         setIsTyping(false);
         setLoadingType(null);
       }
