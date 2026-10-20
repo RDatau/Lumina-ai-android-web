@@ -3791,6 +3791,8 @@ export const streamSpeech = async (
     // Mode Sange: Ada moans tapi bukan Puncak, atau kata-kata sensual eksplisit
     const isSange = !isPuncak && (hasMoans || /sange|basah|ketat|becek|puting|desah/i.test(text));
     
+    const ttsTemperature = getActiveTtsTemperature(userProfile);
+    
     const styleInstruction = `
       Gaya Bicara: ${personality}.
       Instruksi Tambahan: Jika ada desahan seperti "ahhh" atau "mmmh", bacakan dengan sangat natural seperti manusia asli yang sedang merasakannya.
@@ -3816,6 +3818,7 @@ export const streamSpeech = async (
             config: {
               responseModalities: [Modality.AUDIO],
               speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName } } },
+              temperature: ttsTemperature,
               safetySettings: safetySettings as any
             },
           });
@@ -3856,6 +3859,7 @@ export const streamSpeech = async (
             config: {
               responseModalities: [Modality.AUDIO],
               speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName } } },
+              temperature: ttsTemperature,
               safetySettings: safetySettings as any
             },
           });
