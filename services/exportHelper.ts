@@ -70,63 +70,69 @@ export const downloadMediaFile = async (
       blob = new Blob([urlOrData as any], { type: mimeType });
     }
 
-    // Determine platform environment
-    const isMobile = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    // Determine platform environment with strict WebView detection (preventing false positives on Chrome PWA)
     const isMedianOrWebView = 
       typeof navigator !== 'undefined' && (
         /gonative|median/i.test(navigator.userAgent) || 
-        /Android.*(wv|\.0\.0\.0|Version\/4\.0)/i.test(navigator.userAgent) || 
+        /;\s*wv\b/i.test(navigator.userAgent) || 
         typeof (window as any).median !== 'undefined' || 
         typeof (window as any).gonative !== 'undefined'
       );
 
-    // CRITICAL FIX FOR MEDIAN.CO APK:
-    // Try Proxy POST for WebView to force Content-Disposition.
-    if (isMedianOrWebView) {
-      try {
-        console.log('[exportHelper] Mencoba unduhan via proxy...');
-        const reader = new FileReader();
-        const base64Data = await new Promise<string>((resolve) => {
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.readAsDataURL(blob);
-        });
+    // Standard client-side download as primary path (instant download)
+    const performStandardDownload = () => {
+      console.log('[exportHelper] Menggunakan unduhan standar (client-side blob)...');
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = fileName;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      
+      setTimeout(() => {
+          URL.revokeObjectURL(blobUrl);
+          if (link.parentNode) document.body.removeChild(link);
+      }, 1500);
+    };
 
-        const response = await fetch('/api/download-proxy', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ data: base64Data, fileName, mimeType })
-        });
-
-        if (response.ok) {
-          const blobRes = await response.blob();
-          const url = URL.createObjectURL(blobRes);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = fileName;
-          link.click();
-          URL.revokeObjectURL(url);
-          return;
-        }
-      } catch (e) {
-        console.error('[exportHelper] Proxy download failed, falling back:', e);
-      }
+    // If NOT a native WebView/Median wrapper, prioritize instant client-side download immediately
+    if (!isMedianOrWebView) {
+      performStandardDownload();
+      return;
     }
 
-    // Standard: Menggunakan <a> download standar
-    console.log('[exportHelper] Menggunakan unduhan standar...');
-    const blobUrl = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = blobUrl;
-    link.download = fileName;
-    link.style.display = 'none';
-    document.body.appendChild(link);
-    link.click();
-    
-    // Clean up DOM node
-    setTimeout(() => {
-        URL.revokeObjectURL(blobUrl);
-        document.body.removeChild(link);
-    }, 1500);
+    // For verified Median/WebView wrappers, try Proxy POST to force Content-Disposition
+    try {
+      console.log('[exportHelper] Mencoba unduhan via proxy (WebView wrapper detected)...');
+      const reader = new FileReader();
+      const base64Data = await new Promise<string>((resolve) => {
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(blob);
+      });
+
+      const response = await fetch('/api/download-proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: base64Data, fileName, mimeType })
+      });
+
+      if (response.ok) {
+        const blobRes = await response.blob();
+        const url = URL.createObjectURL(blobRes);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        link.click();
+        URL.revokeObjectURL(url);
+        return;
+      }
+    } catch (e) {
+      console.error('[exportHelper] Proxy download failed, falling back to standard download:', e);
+    }
+
+    // Fallback to standard download if proxy failed
+    performStandardDownload();
     return;
 
   } catch (err) {
