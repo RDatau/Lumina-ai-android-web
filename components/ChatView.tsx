@@ -575,6 +575,13 @@ const ChatView: React.FC<ChatViewProps> = ({
 
     return () => clearInterval(interval);
   }, [loadingType, allPapSlots]);
+  const currentActiveSessionId = activeThread.length > 0 ? activeThread[0].id : 'new_session';
+  useEffect(() => {
+    setIsTyping(false);
+    setLoadingType(null);
+    setLoadingStatus('');
+  }, [currentActiveSessionId]);
+
   const [loadingAudioId, setLoadingAudioId] = useState<string | null>(null);
   const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
   const [streamingAudioId, setStreamingAudioId] = useState<string | null>(null);
@@ -2254,7 +2261,11 @@ const ChatView: React.FC<ChatViewProps> = ({
 
         try { 
           papUrl = await generatePAP(rawFirstResponse, config, userProfile, fFiles, historyForPap, (status, previewInfo) => {
-            if (isMounted.current) {
+            const curAgentId = config.id || 'default';
+            const curSessionId = activeThread.length > 0 ? activeThread[0].id : 'new_session';
+            const stillInContext = curAgentId === capturedAgentId && curSessionId === capturedSessionId;
+
+            if (stillInContext && isMounted.current) {
               setLoadingStatus(status);
               if (previewInfo) {
                 setPapSlotPreview(previewInfo);
