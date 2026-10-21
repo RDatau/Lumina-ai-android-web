@@ -31,13 +31,6 @@ export const getActiveTtsModel = (profile?: UserProfile): string => {
   return global.ttsModel || profile?.ttsModel || DEFAULT_GLOBAL_GEMINI_SETTINGS.ttsModel;
 };
 
-export const getActiveTtsTemperature = (profile?: UserProfile): number => {
-  const global = getEffectiveGlobalGeminiSettings();
-  if (typeof global.ttsTemperature === 'number') return global.ttsTemperature;
-  if (typeof profile?.ttsTemperature === 'number') return profile.ttsTemperature;
-  return DEFAULT_GLOBAL_GEMINI_SETTINGS.ttsTemperature ?? 2.0;
-};
-
 /**
  * Memeriksa apakah model TTS yang dipilih mendukung streaming audio bertahap (generateContentStream).
  * Model TTS generasi terbaru (gemini-3.8 / 3.1) mendukung audio streaming bertahap,
@@ -1065,7 +1058,6 @@ ${papContext}
 - Kamu WAJIB memperbarui pengetahuanmu tentang dirimu sendiri berdasarkan hasil pencarian Google terbaru (Grounding). Jika ada berita terbaru tentang hidupmu (seperti pernikahan, prestasi, atau kejadian penting), kamu harus mengakuinya secara natural sebagai bagian dari hidupmu sekarang. Jangan membantah fakta yang sudah diberitakan secara luas.
 - Bertindaklah sesuai dengan pengetahuan umum dan konteks identitas kamu.
 - Kepribadian Utama: ${config.personality}.
-${config.styleInstruction ? `- Gaya Bicara / Style Instruction Khusus: ${config.styleInstruction}` : ''}
 ${enrichedContext}
 ${userContext}
 ${userOutfitContext}
@@ -3779,7 +3771,7 @@ export const streamSpeech = async (
 
     const effectiveTtsModel = getActiveTtsModel(userProfile);
     const supportsStreaming = isTtsModelStreamSupported(effectiveTtsModel);
-    const voiceName = getEffectiveGlobalGeminiSettings().voiceChat || userProfile?.voiceChat || ((effectiveTtsModel === 'gemini-3.8-flash-tts' || effectiveTtsModel === 'gemini-3.8-flash-lite-tts') ? "Fola" : "Aoede");
+    const voiceName = getEffectiveGlobalGeminiSettings().voiceChat || userProfile?.voiceChat || (effectiveTtsModel === 'gemini-3.8-flash-tts' ? "Fola" : "Aoede");
     const personality = config.personality;
     const hasMoans = /ah+h|mm+h|uh+h|oh+h/i.test(text);
     const hasSexualVerbs = /crot|peju|memek|kontol|ngewe|colok|jilat|hisap|isap/i.test(text);
@@ -3792,11 +3784,8 @@ export const streamSpeech = async (
     // Mode Sange: Ada moans tapi bukan Puncak, atau kata-kata sensual eksplisit
     const isSange = !isPuncak && (hasMoans || /sange|basah|ketat|becek|puting|desah/i.test(text));
     
-    const ttsTemperature = getActiveTtsTemperature(userProfile);
-    
-    const effectiveStyle = config.styleInstruction || personality;
     const styleInstruction = `
-      Gaya Bicara: ${effectiveStyle}.
+      Gaya Bicara: ${personality}.
       Instruksi Tambahan: Jika ada desahan seperti "ahhh" atau "mmmh", bacakan dengan sangat natural seperti manusia asli yang sedang merasakannya.
     `;
 
@@ -3820,7 +3809,6 @@ export const streamSpeech = async (
             config: {
               responseModalities: [Modality.AUDIO],
               speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName } } },
-              temperature: ttsTemperature,
               safetySettings: safetySettings as any
             },
           });
@@ -3861,7 +3849,6 @@ export const streamSpeech = async (
             config: {
               responseModalities: [Modality.AUDIO],
               speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName } } },
-              temperature: ttsTemperature,
               safetySettings: safetySettings as any
             },
           });

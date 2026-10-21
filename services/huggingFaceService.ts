@@ -146,6 +146,23 @@ export const cleanDuplicatePrompt = (prompt: string): string => {
 };
 
 /**
+ * Membersihkan caption/prompt dari frasa ekspresi nafas yang dilarang (Prompt Refinement).
+ */
+export const purifyIntenseExpression = (prompt: string): string => {
+  if (!prompt) return '';
+
+  const forbidden = [/heavy,\s*labored\s*breathing/gi, /heavy\s*panting/gi];
+  const replacement = "in the midst of an intense climactic moment, eyes tightly closed with visible strain and long dark eyelashes pressing against the skin, eyebrows arched upward in a look of overwhelming sensation. Lips are parted slightly to reveal teeth, with a subtle sheen or moisture giving them a soft, sensual texture. The head is tilted back at an elegant, vulnerable angle, exposing the smooth line of the neck and collarbone. Expression conveys raw, unfiltered passion and peak pleasure, with hair slightly disheveled and falling around the face,";
+
+  let cleaned = prompt;
+  for (const regex of forbidden) {
+    cleaned = cleaned.replace(regex, replacement);
+  }
+  return cleaned;
+};
+
+
+/**
  * Reset status kuota token (misalnya saat user mengedit pengaturan)
  */
 export const resetHFTokenRotation = () => {
@@ -915,7 +932,8 @@ export const generateWithHuggingFaceSpace = async (
                          prompt.toLowerCase().includes('two people') ||
                          (prompt.toLowerCase().includes('character 1') && prompt.toLowerCase().includes('character 2'));
 
-  let effectivePrompt = cleanDuplicatePrompt(prompt.trim());
+  let effectivePrompt = purifyIntenseExpression(prompt.trim());
+  effectivePrompt = cleanDuplicatePrompt(effectivePrompt);
   const isSingleImageOnly = !extraRefImage && (!additionalImages || additionalImages.length === 0);
 
   if (isSingleImageOnly) {
@@ -1555,7 +1573,8 @@ export const generateLtxVideo = async (
   const spaceHost = await normalizeHFSpaceUrl(spaceUrl || DEFAULT_LTX_VIDEO_SPACE_URL);
   const tokens = parseHFTokens(rawTokens);
 
-  let enhancedPrompt = cleanDuplicatePrompt(prompt.trim());
+  let enhancedPrompt = purifyIntenseExpression(prompt.trim());
+  enhancedPrompt = cleanDuplicatePrompt(enhancedPrompt);
   if (!enhancedPrompt.toLowerCase().includes('audio intent')) {
     enhancedPrompt = `${enhancedPrompt} (Audio Intent: Suara latar yang natural dan dialog jelas yang menyatu dengan adegan sepanjang ${duration} detik, tanpa terpotong)`;
   }
