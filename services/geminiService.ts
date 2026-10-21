@@ -1065,6 +1065,7 @@ ${papContext}
 - Kamu WAJIB memperbarui pengetahuanmu tentang dirimu sendiri berdasarkan hasil pencarian Google terbaru (Grounding). Jika ada berita terbaru tentang hidupmu (seperti pernikahan, prestasi, atau kejadian penting), kamu harus mengakuinya secara natural sebagai bagian dari hidupmu sekarang. Jangan membantah fakta yang sudah diberitakan secara luas.
 - Bertindaklah sesuai dengan pengetahuan umum dan konteks identitas kamu.
 - Kepribadian Utama: ${config.personality}.
+${config.styleInstruction ? `- Gaya Bicara / Style Instruction Khusus: ${config.styleInstruction}` : ''}
 ${enrichedContext}
 ${userContext}
 ${userOutfitContext}
@@ -3793,8 +3794,9 @@ export const streamSpeech = async (
     
     const ttsTemperature = getActiveTtsTemperature(userProfile);
     
+    const effectiveStyle = config.styleInstruction || personality;
     const styleInstruction = `
-      Gaya Bicara: ${personality}.
+      Gaya Bicara: ${effectiveStyle}.
       Instruksi Tambahan: Jika ada desahan seperti "ahhh" atau "mmmh", bacakan dengan sangat natural seperti manusia asli yang sedang merasakannya.
     `;
 

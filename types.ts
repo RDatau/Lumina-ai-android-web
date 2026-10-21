@@ -17,6 +17,7 @@ export interface AgentConfig {
   callModel?: string;
   blur?: number;
   transparency?: number;
+  styleInstruction?: string;
 }
 
 export interface Attachment {

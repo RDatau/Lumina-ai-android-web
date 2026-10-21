@@ -47,6 +47,28 @@ const SetupView: React.FC<SetupViewProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [isDraggingImport, setIsDraggingImport] = useState(false);
   const restoreInputRef = useRef<HTMLInputElement>(null);
+  const txtInputRef = useRef<HTMLInputElement>(null);
+
+  const handleTxtUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      if (text !== undefined) {
+        setConfig({ ...config, styleInstruction: text });
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  const styleTemplates = [
+    { label: "Manja & Lembut", text: "Suara lembut, manja, penuh kasih sayang, sering menggunakan panggilan sayang seperti 'mas', 'sayang', dengan desahan halus yang menenangkan." },
+    { label: "Tsundere Manis", text: "Terkesan ketus atau gengsi di awal, namun sebenarnya sangat peduli, perhatian, dan luluh ketika diajak berbicara mesra." },
+    { label: "Sensual & Menggoda", text: "Nada bicara mendesah, pelan, menggoda, penuh gairah, dengan penekanan kata yang sensual dan ekspresif." },
+    { label: "Santai & Akrab", text: "Gaya bicara santai, kasual, hangat, akrab seperti teman dekat yang selalu ada untuk mendengarkan." }
+  ];
 
   const handleSaveProfile = () => {
     let newProfiles = [...profiles];
@@ -537,6 +559,53 @@ const SetupView: React.FC<SetupViewProps> = ({
                     Karakter akan menyesuaikan gaya percakapan dan intonasi suara berdasarkan deskripsi ini.
                   </p>
                 </div>
+
+                {/* Gaya Bicara / Style Instruction Box */}
+                <div className={`p-4 rounded-2xl border ${dynamicBorderColor} ${isBackgroundDark ? 'bg-white/5' : 'bg-black/5'} space-y-2.5`}>
+                  <div className="flex items-center justify-between select-none">
+                    <label className={`text-[10px] font-black ${dynamicMutedTextColor} uppercase tracking-[0.25em]`}>
+                      Gaya Bicara / Style Instruction
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => txtInputRef.current?.click()}
+                        className="text-[9px] font-black uppercase tracking-wider px-2 py-1 rounded-lg bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/35 transition-all flex items-center gap-1 cursor-pointer"
+                        title="Upload file .txt untuk gaya bicara"
+                      >
+                        <Upload className="w-2.5 h-2.5" />
+                        Upload .txt
+                      </button>
+                      <span className={`text-[8px] font-mono ${dynamicMutedTextColor}`}>
+                        {config.styleInstruction?.length || 0} char
+                      </span>
+                    </div>
+                  </div>
+
+                  <textarea 
+                    className={`w-full h-28 ${isBackgroundDark ? 'bg-black/20' : 'bg-white/30'} border ${dynamicBorderColor} rounded-xl p-3 outline-none resize-none text-xs font-medium custom-scrollbar ${dynamicTextColor} placeholder:${isBackgroundDark ? 'text-white/20' : 'text-black/20'} leading-relaxed`} 
+                    placeholder="Instruksi khusus gaya bicara/TTS (misal: intonasi, tempo, desahan, gaya vokal... atau upload file .txt)"
+                    value={config.styleInstruction || ''} 
+                    onChange={(e) => setConfig({ ...config, styleInstruction: e.target.value })} 
+                  />
+
+                  {/* Template Gaya Bicara */}
+                  <div className="space-y-1.5 pt-1">
+                    <span className={`text-[8px] font-bold ${dynamicMutedTextColor} uppercase tracking-wider block`}>Template Gaya Bicara:</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {styleTemplates.map((tpl, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setConfig({ ...config, styleInstruction: tpl.text })}
+                          className={`text-[9px] font-bold px-2 py-1 rounded-lg border ${dynamicBorderColor} ${isBackgroundDark ? 'bg-white/5 hover:bg-white/10 text-white/80' : 'bg-black/5 hover:bg-black/10 text-black/80'} transition-all cursor-pointer`}
+                        >
+                          {tpl.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Column 2: Tools & Danger Zone */}
@@ -646,6 +715,13 @@ const SetupView: React.FC<SetupViewProps> = ({
         className="hidden" 
         accept=".json" 
         onChange={handleRestoreFile} 
+      />
+      <input 
+        type="file" 
+        ref={txtInputRef} 
+        className="hidden" 
+        accept=".txt" 
+        onChange={handleTxtUpload} 
       />
     </div>
   );

@@ -883,7 +883,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                       </div>
 
                       {/* Voice Model (TTS) Dropdown */}
-                      <div className={`p-3.5 rounded-2xl border ${dynamicBorderColor} ${isBackgroundDark ? 'bg-white/5' : 'bg-black/5'} space-y-2`}>
+                      <div className={`p-3.5 rounded-2xl border ${dynamicBorderColor} ${isBackgroundDark ? 'bg-white/5' : 'bg-black/5'} space-y-3`}>
                         <label className={`text-[10px] font-black ${dynamicMutedTextColor} uppercase tracking-[0.25em] select-none block`}>Model Voice (TTS Global)</label>
                         <GlassDropdown
                           size="sm"
@@ -908,6 +908,28 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                             { value: 'gemini-3.1-flash-tts-preview', label: 'gemini-3.1-flash-tts-preview' }
                           ]}
                         />
+
+                        {/* TTS Temperature Slider (0 to 2.0) */}
+                        <div className="pt-1 space-y-1.5">
+                          <div className="flex items-center justify-between select-none">
+                            <span className={`text-[9px] font-bold ${dynamicMutedTextColor} uppercase tracking-wider`}>TTS Temperature</span>
+                            <span className={`text-[10px] font-mono font-bold ${dynamicTextColor}`}>
+                              {userProfile.ttsTemperature !== undefined ? userProfile.ttsTemperature : 2.0}
+                            </span>
+                          </div>
+                          <input 
+                            type="range"
+                            min="0"
+                            max="2.0"
+                            step="0.1"
+                            value={userProfile.ttsTemperature !== undefined ? userProfile.ttsTemperature : 2.0}
+                            onChange={(e) => updateGlobalGemini({ ttsTemperature: parseFloat(e.target.value) })}
+                            className="w-full accent-indigo-500 cursor-pointer"
+                          />
+                          <p className={`text-[8px] ${dynamicMutedTextColor} leading-tight`}>
+                            Mengatur temperatur/keregaman suara TTS (0 = stabil, 2.0 = sangat ekspresif).
+                          </p>
+                        </div>
                       </div>
 
                       {/* Chat Voice Dropdown */}
