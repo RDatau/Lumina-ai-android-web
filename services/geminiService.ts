@@ -3779,7 +3779,7 @@ export const streamSpeech = async (
 
     const effectiveTtsModel = getActiveTtsModel(userProfile);
     const supportsStreaming = isTtsModelStreamSupported(effectiveTtsModel);
-    const voiceName = getEffectiveGlobalGeminiSettings().voiceChat || userProfile?.voiceChat || (effectiveTtsModel === 'gemini-3.8-flash-tts' ? "Fola" : "Aoede");
+    const voiceName = getEffectiveGlobalGeminiSettings().voiceChat || userProfile?.voiceChat || ((effectiveTtsModel === 'gemini-3.8-flash-tts' || effectiveTtsModel === 'gemini-3.8-flash-lite-tts') ? "Fola" : "Aoede");
     const personality = config.personality;
     const hasMoans = /ah+h|mm+h|uh+h|oh+h/i.test(text);
     const hasSexualVerbs = /crot|peju|memek|kontol|ngewe|colok|jilat|hisap|isap/i.test(text);

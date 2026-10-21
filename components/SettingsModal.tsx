@@ -256,7 +256,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     }
   };
 
-  const isGemini38Tts = userProfile?.ttsModel === 'gemini-3.8-flash-tts';
+  const isGemini38Tts = userProfile?.ttsModel === 'gemini-3.8-flash-tts' || userProfile?.ttsModel === 'gemini-3.8-flash-lite-tts';
 
   const standardVoiceOptions = [
     { value: 'Aoede', label: 'Aoede (Hangat)' },
@@ -269,6 +269,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
   const gemini38VoiceOptions = [
     { value: 'Fola', label: 'Fola (Jernih & Ramah - Medium Pitch)' },
+    { value: 'Tavi', label: 'Tavi (Ekspresif & Natural - Extended Voice)' },
+    { value: 'Gacrux', label: 'Gacrux (Dewasa, matang, berbobot (mature))' },
+    { value: 'Vindemiatrix', label: 'Vindemiatrix (Lembut, menenangkan (gentle))' },
+    { value: 'Leda', label: 'Leda (Muda, segar (youthful))' },
     { value: 'Aoede', label: 'Aoede (Hangat & Natural)' },
     { value: 'Kore', label: 'Kore (Ceria & Tegas)' },
     { value: 'Puck', label: 'Puck (Deep & Santai)' },
@@ -892,7 +896,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                           themeHex={themeHex}
                           onChange={(val) => {
                             const updates: Partial<UserProfile> = { ttsModel: val };
-                            if (val === 'gemini-3.8-flash-tts' && (!userProfile.voiceChat || userProfile.voiceChat === 'Aoede')) {
+                            if ((val === 'gemini-3.8-flash-tts' || val === 'gemini-3.8-flash-lite-tts') && (!userProfile.voiceChat || userProfile.voiceChat === 'Aoede')) {
                               updates.voiceChat = 'Fola';
                             }
                             if (userProfile.voiceCall === 'Fola') {
