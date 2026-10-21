@@ -83,6 +83,69 @@ export const parseHFTokens = (tokensInput?: string): string[] => {
 };
 
 /**
+ * Membersihkan caption/prompt dari duplikasi kalimat atau frasa yang berulang (Prompt Refinement & De-duplication).
+ */
+export const cleanDuplicatePrompt = (prompt: string): string => {
+  if (!prompt) return '';
+
+  // 1. Pecah berdasarkan pemisah kalimat (. ! ? atau newline)
+  const rawSentences = prompt.split(/(?<=[.!?])\s+|\.\s+|\n+/);
+  const seenSet = new Set<string>();
+  const uniqueSentences: string[] = [];
+
+  for (const sentence of rawSentences) {
+    const trimmed = sentence.trim();
+    if (!trimmed) continue;
+
+    // Normalisasi untuk perbandingan duplikasi (lowercase, hapus tanda baca, rapikan spasi)
+    const normalized = trimmed
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    if (!normalized) continue;
+
+    let isDuplicate = false;
+    for (const seen of seenSet) {
+      if (seen === normalized || (normalized.length > 15 && (seen.includes(normalized) || normalized.includes(seen)))) {
+        isDuplicate = true;
+        break;
+      }
+    }
+
+    if (!isDuplicate) {
+      seenSet.add(normalized);
+      uniqueSentences.push(trimmed);
+    }
+  }
+
+  let cleaned = uniqueSentences.join('. ');
+  if (cleaned && !cleaned.endsWith('.') && !cleaned.endsWith('!') && !cleaned.endsWith('?')) {
+    cleaned += '.';
+  }
+
+  // 2. Bersihkan duplikasi klausa yang dipisahkan koma dalam satu kalimat
+  const commaClauses = cleaned.split(/,\s+/);
+  const seenClauses = new Set<string>();
+  const uniqueClauses: string[] = [];
+
+  for (const clause of commaClauses) {
+    const tClause = clause.trim();
+    if (!tClause) continue;
+    const normClause = tClause.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
+    if (!normClause) continue;
+
+    if (!seenClauses.has(normClause)) {
+      seenClauses.add(normClause);
+      uniqueClauses.push(tClause);
+    }
+  }
+
+  return uniqueClauses.join(', ');
+};
+
+/**
  * Reset status kuota token (misalnya saat user mengedit pengaturan)
  */
 export const resetHFTokenRotation = () => {
@@ -852,7 +915,7 @@ export const generateWithHuggingFaceSpace = async (
                          prompt.toLowerCase().includes('two people') ||
                          (prompt.toLowerCase().includes('character 1') && prompt.toLowerCase().includes('character 2'));
 
-  let effectivePrompt = prompt.trim();
+  let effectivePrompt = cleanDuplicatePrompt(prompt.trim());
   const isSingleImageOnly = !extraRefImage && (!additionalImages || additionalImages.length === 0);
 
   if (isSingleImageOnly) {
@@ -1492,7 +1555,7 @@ export const generateLtxVideo = async (
   const spaceHost = await normalizeHFSpaceUrl(spaceUrl || DEFAULT_LTX_VIDEO_SPACE_URL);
   const tokens = parseHFTokens(rawTokens);
 
-  let enhancedPrompt = prompt.trim();
+  let enhancedPrompt = cleanDuplicatePrompt(prompt.trim());
   if (!enhancedPrompt.toLowerCase().includes('audio intent')) {
     enhancedPrompt = `${enhancedPrompt} (Audio Intent: Suara latar yang natural dan dialog jelas yang menyatu dengan adegan sepanjang ${duration} detik, tanpa terpotong)`;
   }
