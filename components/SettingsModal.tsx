@@ -270,9 +270,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   const gemini38VoiceOptions = [
     { value: 'Fola', label: 'Fola (Jernih & Ramah - Medium Pitch)' },
     { value: 'Tavi', label: 'Tavi (Ekspresif & Natural - Extended Voice)' },
-    { value: 'Gacrux', label: 'Gacrux (Dewasa, matang, berbobot (mature))' },
-    { value: 'Vindemiatrix', label: 'Vindemiatrix (Lembut, menenangkan (gentle))' },
-    { value: 'Leda', label: 'Leda (Muda, segar (youthful))' },
+    { value: 'Gacrux', label: 'Gacrux (Dewasa, Matang & Berbobot)' },
+    { value: 'Vindemiatrix', label: 'Vindemiatrix (Lembut & Menenangkan)' },
     { value: 'Aoede', label: 'Aoede (Hangat & Natural)' },
     { value: 'Kore', label: 'Kore (Ceria & Tegas)' },
     { value: 'Puck', label: 'Puck (Deep & Santai)' },
