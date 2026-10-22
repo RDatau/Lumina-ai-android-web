@@ -2865,7 +2865,35 @@ Output ONLY the English translation without preamble, quotes, explanations, or l
   };
   const cleanCaptionForUndress = isEffectiveUndress ? cleanDiscardedMentions(englishCaption) : englishCaption;
 
-  const UNDRESS_EXPRESSION_CLAUSE = "in the midst of an intense climactic moment, eyes tightly closed with visible strain and long dark eyelashes pressing against the skin, eyebrows arched upward in a look of overwhelming sensation. Lips are parted slightly to reveal teeth, with a subtle sheen or moisture giving them a soft, sensual texture. The head is tilted back at an elegant, vulnerable angle, exposing the smooth line of the neck and collarbone. Expression conveys raw, unfiltered passion and peak pleasure, with hair slightly disheveled and falling around the face,";
+  const detectConversationContext = (history: ChatMessage[], currentInput: string): 'NORMAL' | 'SENSUAL' | 'INTENSE' => {
+    const combined = `${currentInput} ${history.slice(-3).map(m => m.text).join(' ')}`.toLowerCase();
+    
+    const intenseKeywords = ['klimaks', 'puncak', 'crot', 'keluar', 'masukin', 'dalam', 'desah', 'ahhh', 'ughh', 'gila', 'nikmat', 'puas', 'orgasm', 'fuck', 'ngewe', 'sange banget', 'pake banget'];
+    const sensualKeywords = ['sange', 'hot', 'mau', 'pegang', 'sentuh', 'cium', 'bibir', 'badan', 'telanjang', 'buka', 'peluk', 'mesra', 'gombal', 'rayu', 'nakal', 'nakal ya'];
+
+    if (intenseKeywords.some(kw => combined.includes(kw))) {
+      return 'INTENSE';
+    }
+    if (sensualKeywords.some(kw => combined.includes(kw))) {
+      return 'SENSUAL';
+    }
+    return 'NORMAL';
+  };
+
+  const getExpressionClauseForContext = (context: 'NORMAL' | 'SENSUAL' | 'INTENSE'): string => {
+    switch (context) {
+      case 'INTENSE':
+        return "in the midst of an intense climactic moment, eyes tightly closed with visible strain and long dark eyelashes pressing against the skin, eyebrows arched upward in a look of overwhelming sensation. Lips are parted slightly to reveal teeth, with a subtle sheen or moisture giving them a soft, sensual texture. The head is tilted back at an elegant, vulnerable angle, exposing the smooth line of the neck and collarbone. Expression conveys raw, unfiltered passion and peak pleasure, with hair slightly disheveled and falling around the face,";
+      case 'SENSUAL':
+        return "intense and captivating gaze, eyes slightly narrowed with a deep, knowing look, long eyelashes, seductive and heavy-lidded appearance. Sensual lips, glossy and full, slightly parted revealing a hint of teeth, bottom lip gently bitten by upper teeth to create a soft, inviting tension. Warm cinematic lighting focusing on the texture of the skin, sharp focus on the iris and the contours of the lips, luxurious atmosphere,";
+      case 'NORMAL':
+      default:
+        return "gentle warm smile, natural relaxed posture, friendly and inviting expression,";
+    }
+  };
+
+  const convContext = detectConversationContext(history, combinedTextForCheck);
+  const EXPRESSION_CLAUSE = getExpressionClauseForContext(convContext);
 
   let UNDRESS_PROMPT = "";
   if (isBottomOnlyUndress) {
@@ -2873,25 +2901,25 @@ Output ONLY the English translation without preamble, quotes, explanations, or l
       const dressRemovalClause = isHandledInitially
         ? `${agentPossessive} removed 1-piece dress (${dressGarment}) is held in ${agentPossessive} hand`
         : `${agentPossessive} discarded ${dressGarment} (1 piece) is neatly placed ${placementSpot}`;
-      UNDRESS_PROMPT = `PARTIAL UNDRESS (BOTTOM REMOVED): Character 1 has pulled up or removed ${agentPossessive} 1-piece dress (${dressGarment}). ${agentPossessive.charAt(0).toUpperCase() + agentPossessive.slice(1)} hips and legs are natural bare skin. ${dressRemovalClause}. Expression and pose: ${UNDRESS_EXPRESSION_CLAUSE} Room setting: ${analyzedRoom}`;
+      UNDRESS_PROMPT = `PARTIAL UNDRESS (BOTTOM REMOVED): Character 1 has pulled up or removed ${agentPossessive} 1-piece dress (${dressGarment}). ${agentPossessive.charAt(0).toUpperCase() + agentPossessive.slice(1)} hips and legs are natural bare skin. ${dressRemovalClause}. Expression and pose: ${EXPRESSION_CLAUSE} Room setting: ${analyzedRoom}`;
     } else {
       const discardedBottomClause = isHandledInitially
         ? `${agentPossessive} removed ${bottomGarment} (1 piece) is held in ${agentPossessive} hand`
         : `${agentPossessive} discarded ${bottomGarment} (1 piece) is neatly placed ${placementSpot}`;
-      UNDRESS_PROMPT = `PARTIAL UNDRESS (BOTTOMLESS ONLY): Character 1 is wearing ${agentPossessive} top (${topGarment}) on ${agentPossessive} upper body. ${agentPossessive.charAt(0).toUpperCase() + agentPossessive.slice(1)} hips and legs are natural bare skin. ${discardedBottomClause}. Expression and pose: ${UNDRESS_EXPRESSION_CLAUSE} Room setting: ${analyzedRoom}`;
+      UNDRESS_PROMPT = `PARTIAL UNDRESS (BOTTOMLESS ONLY): Character 1 is wearing ${agentPossessive} top (${topGarment}) on ${agentPossessive} upper body. ${agentPossessive.charAt(0).toUpperCase() + agentPossessive.slice(1)} hips and legs are natural bare skin. ${discardedBottomClause}. Expression and pose: ${EXPRESSION_CLAUSE} Room setting: ${analyzedRoom}`;
     }
   } else if (isTopOnlyUndress) {
     if (isDress) {
       const dressRemovalClause = isHandledInitially
         ? `${agentPossessive} removed 1-piece dress (${dressGarment}) is held in ${agentPossessive} hand`
         : `${agentPossessive} discarded ${dressGarment} (1 piece) is neatly placed ${placementSpot}`;
-      UNDRESS_PROMPT = `PARTIAL UNDRESS (TOPLESS ONLY): Character 1 has unbuttoned or pulled down ${agentPossessive} 1-piece dress (${dressGarment}). ${agentPossessive.charAt(0).toUpperCase() + agentPossessive.slice(1)} chest and torso are natural bare skin. ${dressRemovalClause}. Expression and pose: ${UNDRESS_EXPRESSION_CLAUSE} Room setting: ${analyzedRoom}`;
+      UNDRESS_PROMPT = `PARTIAL UNDRESS (TOPLESS ONLY): Character 1 has unbuttoned or pulled down ${agentPossessive} 1-piece dress (${dressGarment}). ${agentPossessive.charAt(0).toUpperCase() + agentPossessive.slice(1)} chest and torso are natural bare skin. ${dressRemovalClause}. Expression and pose: ${EXPRESSION_CLAUSE} Room setting: ${analyzedRoom}`;
     } else {
       const topPieceText = topCount > 1 ? `${topCount} pieces` : '1 piece';
       const discardedTopClause = isHandledInitially
         ? `${agentPossessive} removed ${topGarment} (${topPieceText}) is held in ${agentPossessive} hand`
         : `${agentPossessive} discarded ${topGarment} (${topPieceText}) is neatly placed ${placementSpot}`;
-      UNDRESS_PROMPT = `PARTIAL UNDRESS (TOPLESS ONLY): Character 1 is wearing ${agentPossessive} bottom (${bottomGarment}) on ${agentPossessive} lower body. ${agentPossessive.charAt(0).toUpperCase() + agentPossessive.slice(1)} chest and torso are natural bare skin. ${discardedTopClause}. Expression and pose: ${UNDRESS_EXPRESSION_CLAUSE} Room setting: ${analyzedRoom}`;
+      UNDRESS_PROMPT = `PARTIAL UNDRESS (TOPLESS ONLY): Character 1 is wearing ${agentPossessive} bottom (${bottomGarment}) on ${agentPossessive} lower body. ${agentPossessive.charAt(0).toUpperCase() + agentPossessive.slice(1)} chest and torso are natural bare skin. ${discardedTopClause}. Expression and pose: ${EXPRESSION_CLAUSE} Room setting: ${analyzedRoom}`;
     }
   } else {
     let discardedFullClause = "";
@@ -2903,7 +2931,7 @@ Output ONLY the English translation without preamble, quotes, explanations, or l
       const topPieceText = topCount > 1 ? `${topCount} pieces` : '1 piece';
       discardedFullClause = `${agentPossessive} discarded ${topGarment} (${topPieceText}) and discarded ${bottomGarment} (1 piece) is neatly placed ${placementSpot}`;
     }
-    UNDRESS_PROMPT = `FULL UNDRESS: Character 1 is completely undressed (100% natural bare skin). ${discardedFullClause}. Expression and pose: ${UNDRESS_EXPRESSION_CLAUSE} Room setting: ${analyzedRoom}`;
+    UNDRESS_PROMPT = `FULL UNDRESS: Character 1 is completely undressed (100% natural bare skin). ${discardedFullClause}. Expression and pose: ${EXPRESSION_CLAUSE} Room setting: ${analyzedRoom}`;
   }
 
   // Referensi outfit lama HANYA dilanjutkan jika user meminta PAP lanjutan tanpa perintah lepas baju atau ganti pakaian baru

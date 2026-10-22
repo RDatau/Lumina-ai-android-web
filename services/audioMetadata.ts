@@ -43,55 +43,76 @@ export const convertPcmToMp3 = (pcmData: Int16Array, sampleRate: number): Uint8A
 /**
  * Processes an image to be square (1:1) by filling empty areas with a blurred version of itself.
  */
-export const processCoverImage = async (base64Image: string, size: number = 600): Promise<string> => {
-  return new Promise((resolve, reject) => {
+export const processCoverImage = async (base64Image: string, size: number = 600): Promise<string | null> => {
+  let source = base64Image;
+  if (source.startsWith('http://') || source.startsWith('https://')) {
+    try {
+      const resp = await fetch(source);
+      const blob = await resp.blob();
+      source = await new Promise<string>((res) => {
+        const reader = new FileReader();
+        reader.onloadend = () => res(reader.result as string);
+        reader.readAsDataURL(blob);
+      });
+    } catch (e) {
+      console.warn("Failed to fetch cover image URL for processing:", e);
+      return null;
+    }
+  }
+
+  return new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = size;
-      canvas.height = size;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        resolve(base64Image);
-        return;
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(source);
+          return;
+        }
+
+        const w = img.width;
+        const h = img.height;
+
+        // 1. Draw Background (Blurred & Scaled to Cover)
+        const bgScale = Math.max(size / w, size / h);
+        const bgW = w * bgScale;
+        const bgH = h * bgScale;
+        const bgX = (size - bgW) / 2;
+        const bgY = (size - bgH) / 2;
+
+        ctx.save();
+        ctx.filter = 'blur(30px) brightness(0.7)'; // Heavy blur and slightly darker
+        ctx.drawImage(img, bgX - 50, bgY - 50, bgW + 100, bgH + 100); // Extra padding for blur edges
+        ctx.restore();
+
+        // Optional: Add a very subtle dark overlay to the background
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.fillRect(0, 0, size, size);
+
+        // 2. Draw Foreground (Scaled to Fit)
+        const fgScale = Math.min(size / w, size / h);
+        const fgW = w * fgScale;
+        const fgH = h * fgScale;
+        const fgX = (size - fgW) / 2;
+        const fgY = (size - fgH) / 2;
+
+        ctx.drawImage(img, fgX, fgY, fgW, fgH);
+
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      } catch (err) {
+        console.warn("Canvas drawing error for cover image:", err);
+        resolve(source);
       }
-
-      const w = img.width;
-      const h = img.height;
-
-      // 1. Draw Background (Blurred & Scaled to Cover)
-      const bgScale = Math.max(size / w, size / h);
-      const bgW = w * bgScale;
-      const bgH = h * bgScale;
-      const bgX = (size - bgW) / 2;
-      const bgY = (size - bgH) / 2;
-
-      ctx.save();
-      ctx.filter = 'blur(30px) brightness(0.7)'; // Heavy blur and slightly darker
-      ctx.drawImage(img, bgX - 50, bgY - 50, bgW + 100, bgH + 100); // Extra padding for blur edges
-      ctx.restore();
-
-      // Optional: Add a very subtle dark overlay to the background
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-      ctx.fillRect(0, 0, size, size);
-
-      // 2. Draw Foreground (Scaled to Fit)
-      const fgScale = Math.min(size / w, size / h);
-      const fgW = w * fgScale;
-      const fgH = h * fgScale;
-      const fgX = (size - fgW) / 2;
-      const fgY = (size - fgH) / 2;
-
-      ctx.drawImage(img, fgX, fgY, fgW, fgH);
-
-      resolve(canvas.toDataURL('image/jpeg', 0.85));
     };
     img.onerror = (e) => {
       console.error("Image loading error for cover processing:", e);
-      resolve(base64Image);
+      resolve(null);
     };
-    img.src = base64Image;
+    img.src = source;
   });
 };
 
@@ -132,33 +153,35 @@ export const addMetadataToMp3 = async (
       // Process image to be square with blurred background
       const processedCover = await processCoverImage(coverImageBase64);
       
-      const parts = processedCover.split(',');
-      if (parts.length < 2) throw new Error('Invalid base64 image');
-      
-      const data = parts[1];
-      const header = parts[0];
-      const mimeTypeMatch = header.match(/:(.*?);/);
-      let mimeType = mimeTypeMatch ? mimeTypeMatch[1] : 'image/jpeg';
-      
-      // Standardize mime type
-      mimeType = mimeType.toLowerCase();
-      if (mimeType === 'image/jpg') mimeType = 'image/jpeg';
-      
-      const binaryString = atob(data);
-      const bytes = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
+      if (processedCover && processedCover.includes(',')) {
+        const parts = processedCover.split(',');
+        if (parts.length >= 2) {
+          const data = parts[1];
+          const header = parts[0];
+          const mimeTypeMatch = header.match(/:(.*?);/);
+          let mimeType = mimeTypeMatch ? mimeTypeMatch[1] : 'image/jpeg';
+          
+          // Standardize mime type
+          mimeType = mimeType.toLowerCase();
+          if (mimeType === 'image/jpg') mimeType = 'image/jpeg';
+          
+          const binaryString = atob(data);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          
+          // Matching the APIC frame from your Mutagen script
+          (writer as any).setFrame('APIC', {
+            type: 3,             // Cover (front)
+            data: bytes.buffer,
+            description: 'Cover', // Matching desc=u'Cover'
+            mimeType: mimeType
+          });
+        }
       }
-      
-      // Matching the APIC frame from your Mutagen script
-      (writer as any).setFrame('APIC', {
-        type: 3,             // Cover (front)
-        data: bytes.buffer,
-        description: 'Cover', // Matching desc=u'Cover'
-        mimeType: mimeType
-      });
     } catch (e) {
-      console.error('Failed to add cover image to MP3:', e);
+      console.warn('Failed to add cover image to MP3 (skipping cover):', e);
     }
   }
   
