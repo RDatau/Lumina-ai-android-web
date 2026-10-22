@@ -1,3 +1,5 @@
+import { GoogleGenAI } from "@google/genai";
+
 /**
  * Service untuk integrasi Hugging Face Spaces (Gradio 4, 5 & 6) dengan ZeroGPU.
  * Mendukung bennie2390/Qwen-Image-Edit-Rapid-AIO-Loras-Experimental, Qwen/Qwen-Image-Edit,
@@ -85,7 +87,7 @@ export const parseHFTokens = (tokensInput?: string): string[] => {
 /**
  * Membersihkan caption/prompt dari duplikasi kalimat atau frasa yang berulang (Prompt Refinement & De-duplication).
  */
-export const cleanDuplicatePrompt = (prompt: string): string => {
+const stringMatchCleanDuplicate = (prompt: string): string => {
   if (!prompt) return '';
 
   // 1. Pecah berdasarkan pemisah kalimat (. ! ? atau newline)
@@ -143,6 +145,79 @@ export const cleanDuplicatePrompt = (prompt: string): string => {
   }
 
   return uniqueClauses.join(', ');
+};
+
+/**
+ * Membersihkan caption/prompt dari duplikasi kalimat atau frasa yang berulang menggunakan AI (Gemini) untuk rewriting/refinement sebelum masuk ke pipeline generator gambar.
+ */
+export const cleanDuplicatePrompt = async (prompt: string, tokensInput?: string): Promise<string> => {
+  if (!prompt || prompt.length < 20) return prompt;
+
+  try {
+    const tokens = parseHFTokens(tokensInput || '');
+    const apiKey = tokens[0] || (typeof localStorage !== 'undefined' ? localStorage.getItem('lumina_gemini_api_key') : '') || process.env.GEMINI_API_KEY || '';
+    if (!apiKey) {
+      return stringMatchCleanDuplicate(prompt);
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
+    const textModel = 'gemini-3.1-flash-lite';
+
+    const auditInstruction = `You are an elite AI Image Prompt Engineer and Prompt Auditor.
+Analyze and refine this image generation prompt to eliminate any redundancies, duplicated sentences, repeated scene descriptions, and contradictions regarding clothing, undress actions, and discarded garments:
+
+CRITICAL INSTRUCTIONS:
+1. STRICTLY ELIMINATE REPEATED / DUPLICATED SENTENCES & PHRASES:
+   - If any sentence, phrase, or scene description appears twice (e.g., once at the beginning and again later or as "Scene details: ..."), KEEP IT ONLY ONCE.
+   - Remove all redundant or repeated text blocks.
+2. STRICTLY PRESERVE AND STANDARDIZE DISCARDED GARMENTS WITH QUANTITY:
+   - For discarded clothing, ALWAYS keep and preserve ONLY the description that includes the explicit quantity notation in parentheses, e.g., "(1 piece)" or "(... pieces)" (such as "her discarded one pair of light blue distressed denim shorts (1 piece) is neatly placed on the beige sofa cushion next to her").
+   - Remove any other vague, generic, or duplicate mentions of discarded clothes.
+3. RESOLVE CONFLICTS BETWEEN ACTIVE REMOVAL ACTIONS AND DISCARDED PROPS:
+   - If the character is described as still in the middle of an action of removing, shedding, stepping out of, pulling down, or taking off a garment while that same garment is already stated as discarded/neatly placed on the floor/bed:
+     * ELIMINATE the active removal action from the character's pose.
+     * Keep the character's body pose natural and focused on their posture, facial expression, and remaining clothes or bare skin.
+     * Retain the stationary discarded garment with its "(... piece)" count.
+4. PRESERVE ALL ORIGINAL DIRECTIVES:
+   - Faithfully retain all character names, facial biometric reference locks (e.g. Image 1 locks), strictly solo / couple rules, camera framing, lighting, room environment, and photographic quality tags.
+5. OUTPUT FORMAT:
+   - Return ONLY the final polished English prompt string.
+   - Do NOT include markdown code blocks, quotes, apologies, or conversational explanations.`;
+
+    const response = await ai.models.generateContent({
+      model: textModel,
+      contents: [{
+        parts: [{
+          text: `${auditInstruction}\n\nORIGINAL PROMPT TO REWRITE/REFINE:\n"""\n${prompt}\n"""`
+        }]
+      }],
+      config: {
+        temperature: 0.1,
+        maxOutputTokens: 2500,
+        safetySettings: [
+          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_CIVIC_INTEGRITY', threshold: 'BLOCK_NONE' },
+        ] as any,
+      }
+    });
+
+    const refined = response.text?.trim()
+      .replace(/^```(?:markdown|text)?\n?/i, '')
+      .replace(/\n?```$/i, '')
+      .replace(/^["']|["']$/g, '')
+      .trim();
+
+    if (refined && refined.length > 20) {
+      return refined;
+    }
+  } catch (err) {
+    console.warn("[Prompt Refiner AI] Fallback to string matching due to error:", err);
+  }
+
+  return stringMatchCleanDuplicate(prompt);
 };
 
 /**
@@ -915,7 +990,7 @@ export const generateWithHuggingFaceSpace = async (
                          prompt.toLowerCase().includes('two people') ||
                          (prompt.toLowerCase().includes('character 1') && prompt.toLowerCase().includes('character 2'));
 
-  let effectivePrompt = cleanDuplicatePrompt(prompt.trim());
+  let effectivePrompt = await cleanDuplicatePrompt(prompt.trim(), config.tokens);
   const isSingleImageOnly = !extraRefImage && (!additionalImages || additionalImages.length === 0);
 
   if (isSingleImageOnly) {
@@ -1555,7 +1630,7 @@ export const generateLtxVideo = async (
   const spaceHost = await normalizeHFSpaceUrl(spaceUrl || DEFAULT_LTX_VIDEO_SPACE_URL);
   const tokens = parseHFTokens(rawTokens);
 
-  let enhancedPrompt = cleanDuplicatePrompt(prompt.trim());
+  let enhancedPrompt = await cleanDuplicatePrompt(prompt.trim(), rawTokens);
   if (!enhancedPrompt.toLowerCase().includes('audio intent')) {
     enhancedPrompt = `${enhancedPrompt} (Audio Intent: Suara latar yang natural dan dialog jelas yang menyatu dengan adegan sepanjang ${duration} detik, tanpa terpotong)`;
   }

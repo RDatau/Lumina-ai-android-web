@@ -1919,31 +1919,28 @@ export const refinePromptWithAI = async (
 ): Promise<string> => {
   if (!prompt || prompt.length < 20) return prompt;
 
-  const hasDiscardedOrUndress = /\b(?:discarded|stepping out|taking off|removing|dropping|undress|bottomless|topless|piece\))\b/i.test(prompt);
-  if (!hasDiscardedOrUndress) {
-    return prompt;
-  }
-
   try {
     const ai = createGeminiClient(userProfile);
     const textModel = getActiveTextModel(userProfile);
 
     const auditInstruction = `You are an elite AI Image Prompt Engineer and Prompt Auditor.
-Analyze and refine this image generation prompt to eliminate redundancies, contradictions, and duplication regarding clothing, undress actions, and discarded garments:
+Analyze and refine this image generation prompt to eliminate any redundancies, duplicated sentences, repeated scene descriptions, and contradictions regarding clothing, undress actions, and discarded garments:
 
 CRITICAL INSTRUCTIONS:
-1. STRICTLY ELIMINATE DUPLICATE DISCARDED GARMENTS:
-   - If discarded garments are mentioned more than once anywhere in the prompt, KEEP ONLY ONE clean description.
-   - ALWAYS choose and preserve the single discarded description that includes the complete quantity in parentheses, e.g. "(1 piece)" or "(... pieces)".
-   - REMOVE any other duplicate, vague, or second mentions of discarded/dropped clothes in the scene/pose text.
-2. RESOLVE CONFLICTS BETWEEN ACTIVE REMOVAL ACTIONS AND DISCARDED PROPS:
-   - If the character is described as still in the middle of an action of removing, shedding, stepping out of, pulling down, or taking off a garment (e.g. "stepping out of sweatpants onto the floor", "captured mid-action taking off pants") while that same garment is already stated as discarded/neatly placed on the floor/bed:
+1. STRICTLY ELIMINATE REPEATED / DUPLICATED SENTENCES & PHRASES:
+   - If any sentence, phrase, or scene description appears twice (e.g., once at the beginning and again later or as "Scene details: ..."), KEEP IT ONLY ONCE.
+   - Remove all redundant or repeated text blocks.
+2. STRICTLY PRESERVE AND STANDARDIZE DISCARDED GARMENTS WITH QUANTITY:
+   - For discarded clothing, ALWAYS keep and preserve ONLY the description that includes the explicit quantity notation in parentheses, e.g., "(1 piece)" or "(... pieces)" (such as "her discarded one pair of light blue distressed denim shorts (1 piece) is neatly placed on the beige sofa cushion next to her").
+   - Remove any other vague, generic, or duplicate mentions of discarded clothes.
+3. RESOLVE CONFLICTS BETWEEN ACTIVE REMOVAL ACTIONS AND DISCARDED PROPS:
+   - If the character is described as still in the middle of an action of removing, shedding, stepping out of, pulling down, or taking off a garment while that same garment is already stated as discarded/neatly placed on the floor/bed:
      * ELIMINATE the active removal action from the character's pose.
      * Keep the character's body pose natural and focused on their posture, facial expression, and remaining clothes or bare skin.
      * Retain the stationary discarded garment with its "(... piece)" count.
-3. PRESERVE ALL ORIGINAL DIRECTIVES:
+4. PRESERVE ALL ORIGINAL DIRECTIVES:
    - Faithfully retain all character names, facial biometric reference locks (e.g. Image 1 locks), strictly solo / couple rules, camera framing, lighting, room environment, and photographic quality tags.
-4. OUTPUT FORMAT:
+5. OUTPUT FORMAT:
    - Return ONLY the final polished English prompt string.
    - Do NOT include markdown code blocks, quotes, apologies, or conversational explanations.`;
 
@@ -2868,31 +2865,33 @@ Output ONLY the English translation without preamble, quotes, explanations, or l
   };
   const cleanCaptionForUndress = isEffectiveUndress ? cleanDiscardedMentions(englishCaption) : englishCaption;
 
+  const UNDRESS_EXPRESSION_CLAUSE = "in the midst of an intense climactic moment, eyes tightly closed with visible strain and long dark eyelashes pressing against the skin, eyebrows arched upward in a look of overwhelming sensation. Lips are parted slightly to reveal teeth, with a subtle sheen or moisture giving them a soft, sensual texture. The head is tilted back at an elegant, vulnerable angle, exposing the smooth line of the neck and collarbone. Expression conveys raw, unfiltered passion and peak pleasure, with hair slightly disheveled and falling around the face,";
+
   let UNDRESS_PROMPT = "";
   if (isBottomOnlyUndress) {
     if (isDress) {
       const dressRemovalClause = isHandledInitially
         ? `${agentPossessive} removed 1-piece dress (${dressGarment}) is held in ${agentPossessive} hand`
         : `${agentPossessive} discarded ${dressGarment} (1 piece) is neatly placed ${placementSpot}`;
-      UNDRESS_PROMPT = `PARTIAL UNDRESS (BOTTOM REMOVED): Character 1 has pulled up or removed ${agentPossessive} 1-piece dress (${dressGarment}). ${agentPossessive.charAt(0).toUpperCase() + agentPossessive.slice(1)} hips and legs are natural bare skin. ${dressRemovalClause}. Scene details: ${cleanCaptionForUndress}`;
+      UNDRESS_PROMPT = `PARTIAL UNDRESS (BOTTOM REMOVED): Character 1 has pulled up or removed ${agentPossessive} 1-piece dress (${dressGarment}). ${agentPossessive.charAt(0).toUpperCase() + agentPossessive.slice(1)} hips and legs are natural bare skin. ${dressRemovalClause}. Expression and pose: ${UNDRESS_EXPRESSION_CLAUSE} Scene details: ${cleanCaptionForUndress}`;
     } else {
       const discardedBottomClause = isHandledInitially
         ? `${agentPossessive} removed ${bottomGarment} (1 piece) is held in ${agentPossessive} hand`
         : `${agentPossessive} discarded ${bottomGarment} (1 piece) is neatly placed ${placementSpot}`;
-      UNDRESS_PROMPT = `PARTIAL UNDRESS (BOTTOMLESS ONLY): Character 1 is wearing ${agentPossessive} top (${topGarment}) on ${agentPossessive} upper body. ${agentPossessive.charAt(0).toUpperCase() + agentPossessive.slice(1)} hips and legs are natural bare skin. ${discardedBottomClause}. Scene details: ${cleanCaptionForUndress}`;
+      UNDRESS_PROMPT = `PARTIAL UNDRESS (BOTTOMLESS ONLY): Character 1 is wearing ${agentPossessive} top (${topGarment}) on ${agentPossessive} upper body. ${agentPossessive.charAt(0).toUpperCase() + agentPossessive.slice(1)} hips and legs are natural bare skin. ${discardedBottomClause}. Expression and pose: ${UNDRESS_EXPRESSION_CLAUSE} Scene details: ${cleanCaptionForUndress}`;
     }
   } else if (isTopOnlyUndress) {
     if (isDress) {
       const dressRemovalClause = isHandledInitially
         ? `${agentPossessive} removed 1-piece dress (${dressGarment}) is held in ${agentPossessive} hand`
         : `${agentPossessive} discarded ${dressGarment} (1 piece) is neatly placed ${placementSpot}`;
-      UNDRESS_PROMPT = `PARTIAL UNDRESS (TOPLESS ONLY): Character 1 has unbuttoned or pulled down ${agentPossessive} 1-piece dress (${dressGarment}). ${agentPossessive.charAt(0).toUpperCase() + agentPossessive.slice(1)} chest and torso are natural bare skin. ${dressRemovalClause}. Scene details: ${cleanCaptionForUndress}`;
+      UNDRESS_PROMPT = `PARTIAL UNDRESS (TOPLESS ONLY): Character 1 has unbuttoned or pulled down ${agentPossessive} 1-piece dress (${dressGarment}). ${agentPossessive.charAt(0).toUpperCase() + agentPossessive.slice(1)} chest and torso are natural bare skin. ${dressRemovalClause}. Expression and pose: ${UNDRESS_EXPRESSION_CLAUSE} Scene details: ${cleanCaptionForUndress}`;
     } else {
       const topPieceText = topCount > 1 ? `${topCount} pieces` : '1 piece';
       const discardedTopClause = isHandledInitially
         ? `${agentPossessive} removed ${topGarment} (${topPieceText}) is held in ${agentPossessive} hand`
         : `${agentPossessive} discarded ${topGarment} (${topPieceText}) is neatly placed ${placementSpot}`;
-      UNDRESS_PROMPT = `PARTIAL UNDRESS (TOPLESS ONLY): Character 1 is wearing ${agentPossessive} bottom (${bottomGarment}) on ${agentPossessive} lower body. ${agentPossessive.charAt(0).toUpperCase() + agentPossessive.slice(1)} chest and torso are natural bare skin. ${discardedTopClause}. Scene details: ${cleanCaptionForUndress}`;
+      UNDRESS_PROMPT = `PARTIAL UNDRESS (TOPLESS ONLY): Character 1 is wearing ${agentPossessive} bottom (${bottomGarment}) on ${agentPossessive} lower body. ${agentPossessive.charAt(0).toUpperCase() + agentPossessive.slice(1)} chest and torso are natural bare skin. ${discardedTopClause}. Expression and pose: ${UNDRESS_EXPRESSION_CLAUSE} Scene details: ${cleanCaptionForUndress}`;
     }
   } else {
     let discardedFullClause = "";
@@ -2904,7 +2903,7 @@ Output ONLY the English translation without preamble, quotes, explanations, or l
       const topPieceText = topCount > 1 ? `${topCount} pieces` : '1 piece';
       discardedFullClause = `${agentPossessive} discarded ${topGarment} (${topPieceText}) and discarded ${bottomGarment} (1 piece) are neatly placed ${placementSpot}`;
     }
-    UNDRESS_PROMPT = `FULL UNDRESS: Character 1 is completely undressed (100% natural bare skin). ${discardedFullClause}. Scene details: ${cleanCaptionForUndress}`;
+    UNDRESS_PROMPT = `FULL UNDRESS: Character 1 is completely undressed (100% natural bare skin). ${discardedFullClause}. Expression and pose: ${UNDRESS_EXPRESSION_CLAUSE} Scene details: ${cleanCaptionForUndress}`;
   }
 
   // Referensi outfit lama HANYA dilanjutkan jika user meminta PAP lanjutan tanpa perintah lepas baju atau ganti pakaian baru
