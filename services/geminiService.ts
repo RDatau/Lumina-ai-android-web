@@ -1228,16 +1228,17 @@ export const reviseAgentResponseBasedOnImage = async (
   const mimeType = header.split(':')[1].split(';')[0];
 
   const prompt = `
-    Kamu sebelumnya berencana mengirim sebuah foto atau hasil edit foto dengan caption dan pesan berikut:
+    Kamu sebelumnya berencana mengirim sebuah foto atau hasil edit foto dengan pesan berikut:
     "${originalResponse}"
 
     Tugasmu sekarang:
     1. LIHAT foto yang benar-benar dihasilkan (terlampir).
     2. REVISI pesan aslimu agar SESUAI dengan apa yang BENAR-BENAR ada di foto tersebut.
-    3. Jika ini adalah hasil edit foto milik user (misal mengedit warna pakaian, latar belakang, atau menggabungkan foto), berikan apresiasi dan penjelasan manis tentang hasil editan fotonya sesuai personamu.
-    4. Jika ini adalah foto dirimu (PAP), bicaralah seolah-olah itu foto dirimu yang baru kamu ambil.
-    5. JANGAN sebutkan bahwa "AI salah" atau "fotonya beda".
-    6. JANGAN sertakan tag [CAPTION: ...] lagi di balasanmu ini. Langsung saja tulis pesan chatnya.
+    3. PENTING: Kamu HARUS mempertahankan jawaban atas pertanyaan user dari percakapan sebelumnya yang sudah ada di pesan aslimu ("${originalResponse}"). JANGAN menghapus jawaban tersebut. Gabungkan komentar tentang foto dengan jawaban atas pertanyaan user tersebut secara natural dalam satu pesan yang padu.
+    4. Jika ini adalah hasil edit foto milik user, berikan apresiasi dan penjelasan manis tentang hasil editan fotonya sesuai personamu.
+    5. Jika ini adalah foto dirimu (PAP), bicaralah seolah-olah itu foto dirimu yang baru kamu ambil.
+    6. JANGAN sebutkan bahwa "AI salah" atau "fotonya beda".
+    7. JANGAN sertakan tag [CAPTION: ...] lagi di balasanmu ini. Langsung saja tulis pesan chatnya.
   `;
 
   try {
