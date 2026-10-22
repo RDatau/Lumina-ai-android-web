@@ -2914,8 +2914,8 @@ Output ONLY the English translation without preamble, quotes, explanations, or l
   const detectConversationContext = (history: ChatMessage[], currentInput: string): 'NORMAL' | 'SENSUAL' | 'INTENSE' => {
     const combined = `${currentInput} ${history.slice(-3).map(m => m.text).join(' ')}`.toLowerCase();
     
-    const intenseKeywords = ['klimaks', 'puncak', 'crot', 'keluar', 'masukin', 'dalam', 'desah', 'ahhh', 'ughh', 'gila', 'nikmat', 'puas', 'orgasm', 'fuck', 'ngewe', 'sange banget', 'pake banget'];
-    const sensualKeywords = ['sange', 'hot', 'mau', 'pegang', 'sentuh', 'cium', 'bibir', 'badan', 'telanjang', 'buka', 'peluk', 'mesra', 'gombal', 'rayu', 'nakal', 'nakal ya'];
+    const intenseKeywords = ['klimaks', 'puncak', 'crot', 'keluar', 'masukin', 'dalam', 'gila', 'nikmat', 'puas', 'orgasm', 'fuck', 'ngentot', 'ngewe', 'sange banget', 'pake banget'];
+    const sensualKeywords = ['sensual', 'sange', 'hot', 'mau', 'pegang', 'sentuh', 'jilat', 'puting', 'klitoris', 'cium', 'bibir', 'badan', 'telanjang', 'buka', 'peluk', 'mesra', 'gombal', 'rayu', 'nakal', 'nakal ya'];
 
     if (intenseKeywords.some(kw => combined.includes(kw))) {
       return 'INTENSE';
@@ -3332,7 +3332,7 @@ Retain the EXACT SAME LOCATION/SETTING with previous PAP (${analyzedRoom}). Char
                     : isDress
                       ? `- User intent: Full undress. Character 1's discarded ${dressGarment} (1 piece) MUST be placed ${placementSpot}. Character 1 is completely unclothed (100% natural bare skin).`
                       : `- User intent: Full undress. Character 1's discarded ${topGarment} (${topCount} piece${topCount > 1 ? 's' : ''}) and discarded ${bottomGarment} (1 piece) MUST be placed ${placementSpot}. Character 1 is completely unclothed (100% natural bare skin).`}
-              * COMPACT SCALE CONSTRAINT: Describe the removed item strictly as a small, compact bundle (e.g., "one small, compact pair of ${bottomGarment || 'shorts'}" or "small folded bundle"). NEVER use loose words like "cloth" or "fabric" which cause the AI to render sprawling blankets or giant dresses!
+              
               * SINGLE ANCHOR LOCATION: Anchor it strictly to ONE single spot ${placementSpot}. ZERO cloth on the opposite side of the bed.
               * ZERO DUPLICATION / ZERO PILE: Absolutely ZERO duplicate pieces, ZERO cloth on both sides, ZERO messy laundry piles, and ZERO random mismatched colors.
               * STRICT SEPARATION OF WORN VS REMOVED: If Character 1 is STILL WEARING ${agentPossessive} top or bottom, DO NOT describe or mention the worn garment when describing the bed/background! The surface must have ONLY the single removed piece.
