@@ -494,6 +494,48 @@ Rules:
   return currentState;
 }
 
+/**
+ * AI-powered semantic intent classifier for undress actions vs clothing styles/adjustments.
+ */
+export async function evaluateUndressIntentWithAI(
+  userMessage: string,
+  apiKey?: string,
+  userProfile?: UserProfile
+): Promise<boolean> {
+  if (!userMessage || userMessage.trim().length < 2) return false;
+  try {
+    const ai = createGeminiClient(apiKey || userProfile);
+    const model = getActiveTextModel(userProfile) || "gemini-3.1-flash-lite";
+
+    const prompt = `You are a semantic intent classifier for an AI Photo Generator.
+User Message/Context: "${userMessage}"
+
+Task: Determine if the user or context is explicitly commanding the character to remove, take off, strip, or discard their clothing (e.g. undressed, naked, topless, bottomless, take off dress/shirt/pants).
+If the user is describing clothing style, features, high-slit, patterns, fashion design, or regular wearing of clothes, output false.
+Return ONLY a strict JSON object with a single boolean field: "isUndress". No markdown codeblocks. Example: {"isUndress": false}`;
+
+    const res = await ai.models.generateContent({
+      model,
+      contents: [{ parts: [{ text: prompt }] }],
+      config: {
+        temperature: 0.1,
+        maxOutputTokens: 100,
+        safetySettings: safetySettings as any,
+      }
+    });
+
+    const text = res.text?.trim().replace(/^```json\s*|```$/g, '').trim();
+    if (text && text.startsWith('{')) {
+      const parsed = JSON.parse(text);
+      return !!parsed.isUndress;
+    }
+  } catch (e) {
+    console.warn("[evaluateUndressIntentWithAI] Fallback to heuristic due to error:", e);
+  }
+  return true;
+}
+
+
 
 
 const getImageAspectRatio = (base64: string): Promise<string> => {
@@ -2723,7 +2765,11 @@ Output ONLY the English translation without preamble, quotes, explanations, or l
 
   const undressRegex = /\b(lepas|buka|copot|tanggalkan|tanpa|nggak\s+pake|gak\s+pake|ga\s+pake|ngga\s+pake|tidak\s+pakai|gapake)\b.*\b(baju|pakaian|celana|rok|daster|dress|bh|bra|cd|daleman|busana|benang|kain|apa)\b|\b(telanjang|bugil|naked|nude|undress|undressed|strip|stripped|topless|bottomless|bare\s+skin|bare\s+body|mandi|shower|bathtub)\b/i;
 
-  const isExplicitUndress = undressRegex.test(combinedTextForCheck) || undressKeywords.some(kw => combinedTextForCheck.includes(kw));
+  const initialExplicitUndress = undressRegex.test(combinedTextForCheck) || undressKeywords.some(kw => combinedTextForCheck.includes(kw));
+  let isExplicitUndress = initialExplicitUndress;
+  if (initialExplicitUndress) {
+    isExplicitUndress = await evaluateUndressIntentWithAI(combinedTextForCheck, undefined, userProfile);
+  }
 
   const outfitChangeRegex = /\b(ganti|pake|pakai|mengenakan|memakai|berbusana)\b.*\b(baju|pakaian|outfit|daster|dress|piyama|pajamas|kaos|tshirt|t-shirt|tanktop|tank\s+top|croptop|crop\s+top|bikini|lingerie|swimsuit|renang|kemeja|blouse|sweater|hoodie|kebaya|seragam|kostum|hotpants|hot\s+pants|legging|rok|celana|jeans)\b/i;
 
