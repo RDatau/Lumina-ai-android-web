@@ -178,9 +178,14 @@ CRITICAL INSTRUCTIONS:
      * ELIMINATE the active removal action from the character's pose.
      * Keep the character's body pose natural and focused on their posture, facial expression, and remaining clothes or bare skin.
      * Retain the stationary discarded garment with its "(... piece)" count.
-4. PRESERVE ALL ORIGINAL DIRECTIVES:
+5. RESOLVE PARTIAL GARMENT ADJUSTMENT VS DISCARDED CONFLICTS (NO DISCARDED CLOTHES WHEN CLOTHED):
+   - If the character is described as wearing a garment in an adjusted, unbuttoned, pulled down, shifted, lifted, or partially unzipped state (e.g., unbuttoned shirt showing cleavage, lifted skirt hem showing thighs, lowered zipper, pulled collar, shifted blouse):
+     * The garment is STILL WORN ON THE BODY.
+     * ABSOLUTELY ELIMINATE AND REMOVE any mention of discarded clothes, dropped garments, or clothes lying on the sofa/bed/floor!
+     * DO NOT use terms like 'topless', 'bottomless', or 'undressed' if the garment is still worn on the body.
+6. PRESERVE ALL ORIGINAL DIRECTIVES:
    - Faithfully retain all character names, facial biometric reference locks (e.g. Image 1 locks), strictly solo / couple rules, camera framing, lighting, room environment, and photographic quality tags.
-5. OUTPUT FORMAT:
+7. OUTPUT FORMAT:
    - Return ONLY the final polished English prompt string.
    - Do NOT include markdown code blocks, quotes, apologies, or conversational explanations.`;
 
@@ -993,10 +998,13 @@ export const generateWithHuggingFaceSpace = async (
   let effectivePrompt = await cleanDuplicatePrompt(prompt.trim(), config.tokens);
   const isSingleImageOnly = !extraRefImage && (!additionalImages || additionalImages.length === 0);
 
-  if (isSingleImageOnly) {
-    // 🛡️ FIRST PAP PURIFICATION: Mencegah sisa frasa pakaian tergeletak pada PAP pertama kali
+  const isGarmentWornWithAdjustment = /\b(?:unbuttoned|unzipped|lifted|pulled down|partially open|shifted|partially unbuttoned|partially unzipped|singkap|sibak)\b/i.test(effectivePrompt);
+
+  if (isSingleImageOnly || isGarmentWornWithAdjustment) {
+    // 🛡️ GARMENT ADJUSTMENT & FIRST PAP PURIFICATION: Mencegah sisa frasa pakaian tergeletak pada pakaian yang masih dipakai di badan
     effectivePrompt = effectivePrompt
-      .replace(/,\s*her discarded clothes[^,\.]*/gi, '')
+      .replace(/,\s*her discarded [^,\.]*/gi, '')
+      .replace(/,\s*his discarded [^,\.]*/gi, '')
       .replace(/,\s*discarded clothes[^,\.]*/gi, '')
       .replace(/her discarded clothes[^,\.]*/gi, '')
       .replace(/discarded clothes[^,\.]*/gi, '')

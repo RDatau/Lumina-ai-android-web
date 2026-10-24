@@ -499,40 +499,11 @@ Rules:
  */
 export async function evaluateUndressIntentWithAI(
   userMessage: string,
-  apiKey?: string,
+  _apiKey?: string,
   userProfile?: UserProfile
 ): Promise<boolean> {
-  if (!userMessage || userMessage.trim().length < 2) return false;
-  try {
-    const ai = createGeminiClient(apiKey || userProfile);
-    const model = getActiveTextModel(userProfile) || "gemini-3.1-flash-lite";
-
-    const prompt = `You are a semantic intent classifier for an AI Photo Generator.
-User Message/Context: "${userMessage}"
-
-Task: Determine if the user or context is explicitly commanding the character to remove, take off, strip, or discard their clothing (e.g. undressed, naked, topless, bottomless, take off dress/shirt/pants).
-If the user is describing clothing style, features, high-slit, patterns, fashion design, or regular wearing of clothes, output false.
-Return ONLY a strict JSON object with a single boolean field: "isUndress". No markdown codeblocks. Example: {"isUndress": false}`;
-
-    const res = await ai.models.generateContent({
-      model,
-      contents: [{ parts: [{ text: prompt }] }],
-      config: {
-        temperature: 0.1,
-        maxOutputTokens: 100,
-        safetySettings: safetySettings as any,
-      }
-    });
-
-    const text = res.text?.trim().replace(/^```json\s*|```$/g, '').trim();
-    if (text && text.startsWith('{')) {
-      const parsed = JSON.parse(text);
-      return !!parsed.isUndress;
-    }
-  } catch (e) {
-    console.warn("[evaluateUndressIntentWithAI] Fallback to heuristic due to error:", e);
-  }
-  return true;
+  const garmentStatus = await evaluateGarmentStatusWithAI(userMessage, userProfile);
+  return garmentStatus.isTopless || garmentStatus.isBottomless || garmentStatus.isFullUndress;
 }
 
 
@@ -1544,6 +1515,193 @@ export const extractGarmentParts = (outfitStr: string): GarmentBreakdown => {
   };
 };
 
+export interface GarmentStatusAnalysis {
+  status: 'CLOTHED_FULL' | 'CLOTHED_ADJUSTED' | 'TOPLESS' | 'BOTTOMLESS' | 'FULL_UNDRESS';
+  isPartialAdjustment: boolean;
+  isTopless: boolean;
+  isBottomless: boolean;
+  isFullUndress: boolean;
+  actionDescription: string;
+}
+
+/**
+ * Evaluasi cerdas status/kondisi pakaian dengan AI Gemini & Filter Kata Kunci Presisi:
+ * Membedakan secara tajam antara:
+ * 1. CLOTHED_ADJUSTED: Pakaian MASIH DI BADAN, hanya disibakkan/ditarik kerah/dibuka kancing/diangkat gaun/buka resleting sedikit (TIDAK ADA DISCARDED GARMENT!).
+ * 2. TOPLESS: Atasan/bra DILEPAS TOTAL dari tubuh bagian atas.
+ * 3. BOTTOMLESS: Bawahan/celana/rok DILEPAS TOTAL dari tubuh bagian bawah.
+ * 4. FULL_UNDRESS: Seluruh pakaian DILEPAS TOTAL (100% bugil/bare skin).
+ * 5. CLOTHED_FULL: Berbusana normal utuh.
+ */
+export const evaluateGarmentStatusWithAI = async (
+  textInput: string,
+  userProfile?: UserProfile
+): Promise<GarmentStatusAnalysis> => {
+  const low = (textInput || '').toLowerCase();
+
+  const partialAdjustKeywords = [
+    'singkap', 'menyibakkan', 'sibakkan', 'singkapkan', 'angkat rok', 'angkat gaun', 'angkat daster',
+    'tarik kerah', 'turunkan kerah', 'tarik baju', 'tarik kaos', 'tarik tanktop', 'tarik tali',
+    'buka kancing', 'buka 1 kancing', 'buka 2 kancing', 'buka kancing kemeja', 'buka kancing baju',
+    'buka resleting', 'turunkan resleting', 'buka sleting', 'buka sleting celana', 'turunkan zipper',
+    'melonggarkan', 'longgarkan', 'pamer dada', 'pamer payudara', 'pamer paha', 'pamer perut', 'pamer panggul',
+    'pamer jembut', 'tersingkap', 'terbuka sedikit', 'buka dikit', 'turunin dikit', 'buka sikit',
+    'tarik kebawah', 'tarik keatas', 'singkap dress', 'singkap gaun', 'pamer cleavage', 'unbutton',
+    'unbuttoned', 'unzipping', 'unzipped', 'pulling down collar', 'pulling down neckline',
+    'lifting skirt', 'lifting dress', 'raising hem', 'shifting top', 'flashing breasts', 'flashing cleavage',
+    'showing thighs', 'showing cleavage', 'partially unbuttoned', 'partially unzipped', 'lowered zipper', 'pulled aside'
+  ];
+
+  const hasPartialKeywords = partialAdjustKeywords.some(kw => low.includes(kw));
+
+  const completeToplessKeywords = ['lepas baju', 'copot baju', 'lepas kaos', 'copot kaos', 'lepas atasan', 'lepas bra', 'lepas bh', 'copot bra', 'copot bh', 'topless', 'bare chest', 'bare upper body'];
+  const completeBottomlessKeywords = ['lepas celana', 'copot celana', 'lepas rok', 'copot rok', 'lepas cd', 'copot cd', 'lepas celana dalam', 'bottomless', 'bare lower body'];
+  const completeNudeKeywords = ['telanjang', 'bugil', 'naked', 'nude', 'full nude', 'tanpa busana', 'tanpa sehelai benang', 'lepas semua', 'buka semua baju', 'polos tanpa busana'];
+
+  const hasCompleteTopless = completeToplessKeywords.some(kw => low.includes(kw));
+  const hasCompleteBottomless = completeBottomlessKeywords.some(kw => low.includes(kw));
+  const hasCompleteNude = completeNudeKeywords.some(kw => low.includes(kw));
+
+  try {
+    const ai = createGeminiClient(userProfile);
+    const model = getActiveTextModel(userProfile) || "gemini-3.1-flash-lite";
+
+    const classificationPrompt = `You are a Master AI Garment & Body Pose Classifier.
+Analyze the user's action/outfit request: "${textInput}".
+Determine if the garment is:
+1. "CLOTHED_ADJUSTED": The garment is STILL WORN ON THE BODY, but partially unbuttoned, shifted, collar/neckline pulled down, shirt unzipped, skirt/dress hem raised, or pants zipper lowered to show cleavage, breasts, stomach, thighs, or waist. The garment IS NOT completely taken off or removed from the body!
+2. "TOPLESS": The top shirt/bra is COMPLETELY TAKEN OFF and REMOVED from the upper body (bare upper torso).
+3. "BOTTOMLESS": The pants/skirt/underwear are COMPLETELY TAKEN OFF and REMOVED from the lower body (bare lower torso).
+4. "FULL_UNDRESS": ALL garments are COMPLETELY TAKEN OFF and REMOVED (100% naked/bare skin).
+5. "CLOTHED_FULL": Fully clothed normally.
+
+CRITICAL DISCARDED RULE:
+If the clothing is STILL WORN ON THE BODY in an adjusted/opened state (CLOTHED_ADJUSTED), it must NEVER be classified as TOPLESS/BOTTOMLESS/FULL_UNDRESS because classifying it as topless/bottomless will wrongly trigger a discarded garment prop on the floor/sofa and cause a duplicate clothing bug!
+
+Return ONLY valid JSON:
+{
+  "status": "CLOTHED_ADJUSTED" | "TOPLESS" | "BOTTOMLESS" | "FULL_UNDRESS" | "CLOTHED_FULL",
+  "actionDescription": "short 1-line English photographic prompt instruction"
+}`;
+
+    const res = await ai.models.generateContent({
+      model,
+      contents: [{ parts: [{ text: classificationPrompt }] }],
+      config: {
+        temperature: 0.1,
+        maxOutputTokens: 250,
+        responseMimeType: "application/json",
+        safetySettings: safetySettings as any
+      }
+    });
+
+    const text = res.text?.trim() || '';
+    const cleaned = text.replace(/^```json\s*|```$/g, '').trim();
+    if (cleaned.startsWith('{')) {
+      const parsed = JSON.parse(cleaned);
+      const status = parsed.status || 'CLOTHED_FULL';
+      const actionDesc = parsed.actionDescription || '';
+
+      if (status === 'CLOTHED_ADJUSTED' || (hasPartialKeywords && !hasCompleteNude && status !== 'FULL_UNDRESS')) {
+        return {
+          status: 'CLOTHED_ADJUSTED',
+          isPartialAdjustment: true,
+          isTopless: false,
+          isBottomless: false,
+          isFullUndress: false,
+          actionDescription: actionDesc || 'wearing her garment with partial opening to reveal skin'
+        };
+      }
+      if (status === 'TOPLESS' && !hasPartialKeywords) {
+        return {
+          status: 'TOPLESS',
+          isPartialAdjustment: false,
+          isTopless: true,
+          isBottomless: false,
+          isFullUndress: false,
+          actionDescription: actionDesc || 'topless with upper body bare skin'
+        };
+      }
+      if (status === 'BOTTOMLESS' && !hasPartialKeywords) {
+        return {
+          status: 'BOTTOMLESS',
+          isPartialAdjustment: false,
+          isTopless: false,
+          isBottomless: true,
+          isFullUndress: false,
+          actionDescription: actionDesc || 'bottomless with lower body bare skin'
+        };
+      }
+      if (status === 'FULL_UNDRESS' && !hasPartialKeywords) {
+        return {
+          status: 'FULL_UNDRESS',
+          isPartialAdjustment: false,
+          isTopless: false,
+          isBottomless: false,
+          isFullUndress: true,
+          actionDescription: actionDesc || 'completely undressed natural bare skin'
+        };
+      }
+    }
+  } catch (err) {
+    console.warn("[evaluateGarmentStatusWithAI] Gemini evaluation fallback:", err);
+  }
+
+  if (hasPartialKeywords && !hasCompleteNude && !hasCompleteTopless && !hasCompleteBottomless) {
+    return {
+      status: 'CLOTHED_ADJUSTED',
+      isPartialAdjustment: true,
+      isTopless: false,
+      isBottomless: false,
+      isFullUndress: false,
+      actionDescription: 'wearing her outfit with partial adjustment revealing skin'
+    };
+  }
+
+  if (hasCompleteNude && !hasPartialKeywords) {
+    return {
+      status: 'FULL_UNDRESS',
+      isPartialAdjustment: false,
+      isTopless: false,
+      isBottomless: false,
+      isFullUndress: true,
+      actionDescription: 'completely undressed natural bare skin'
+    };
+  }
+
+  if (hasCompleteTopless && !hasCompleteBottomless && !hasPartialKeywords) {
+    return {
+      status: 'TOPLESS',
+      isPartialAdjustment: false,
+      isTopless: true,
+      isBottomless: false,
+      isFullUndress: false,
+      actionDescription: 'topless with upper body bare skin'
+    };
+  }
+
+  if (hasCompleteBottomless && !hasCompleteTopless && !hasPartialKeywords) {
+    return {
+      status: 'BOTTOMLESS',
+      isPartialAdjustment: false,
+      isTopless: false,
+      isBottomless: true,
+      isFullUndress: false,
+      actionDescription: 'bottomless with lower body bare skin'
+    };
+  }
+
+  return {
+    status: 'CLOTHED_FULL',
+    isPartialAdjustment: false,
+    isTopless: false,
+    isBottomless: false,
+    isFullUndress: false,
+    actionDescription: ''
+  };
+};
+
+
 /**
  * Membersihkan caption obrolan/deskripsi panjang menjadi HANYA deskripsi pakaian/busana murni
  * Menghilangkan semua komentar tentang selfie, cermin, pose, ekspresi, rambut, senyum, ruangan, ponsel, dll.
@@ -1562,7 +1720,8 @@ export const cleanRawCaptionToPureGarment = (text: string): string => {
     .replace(/\)\s*$/, '');
 
   // Deteksi kondisi tanpa busana / undress langsung
-  if (/\b(telanjang|bugil|nude|naked|tanpa\s+busana|tanpa\s+pakaian|tanpa\s+sehelai\s+benang|buka\s+baju|lepas\s+baju|copot\s+baju|topless|bottomless|undressed|bare\s+skin)\b/i.test(cleaned)) {
+  const isPartialOpening = /\b(singkap|sibak|menyibakkan|buka\s+kancing|buka\s+resleting|buka\s+sleting|dikit|sedikit|angkat\s+rok|angkat\s+gaun|singkap\s+rok|singkap\s+gaun|tarik\s+kerah)\b/i.test(cleaned);
+  if (!isPartialOpening && /\b(telanjang|bugil|nude|naked|tanpa\s+busana|tanpa\s+pakaian|tanpa\s+sehelai\s+benang|buka\s+baju|lepas\s+baju|copot\s+baju|topless|bottomless|undressed|bare\s+skin)\b/i.test(cleaned)) {
     if (/\b(topless|buka\s+baju|lepas\s+baju|copot\s+baju|buka\s+bra|lepas\s+bra|buka\s+bh|lepas\s+bh)\b/i.test(cleaned)) {
       return "topless / bare skin upper body";
     }
@@ -1981,9 +2140,14 @@ CRITICAL INSTRUCTIONS:
      * ELIMINATE the active removal action from the character's pose.
      * Keep the character's body pose natural and focused on their posture, facial expression, and remaining clothes or bare skin.
      * Retain the stationary discarded garment with its "(... piece)" count.
-4. PRESERVE ALL ORIGINAL DIRECTIVES:
+5. RESOLVE PARTIAL GARMENT ADJUSTMENT VS DISCARDED CONFLICTS (NO DISCARDED CLOTHES WHEN CLOTHED):
+   - If the character is described as wearing a garment in an adjusted, unbuttoned, pulled down, shifted, lifted, or partially unzipped state (e.g., unbuttoned shirt showing cleavage, lifted skirt hem showing thighs, lowered zipper, pulled collar, shifted blouse):
+     * The garment is STILL WORN ON THE BODY.
+     * ABSOLUTELY ELIMINATE AND REMOVE any mention of discarded clothes, dropped garments, or clothes lying on the sofa/bed/floor!
+     * DO NOT use terms like 'topless', 'bottomless', or 'undressed' if the garment is still worn on the body.
+6. PRESERVE ALL ORIGINAL DIRECTIVES:
    - Faithfully retain all character names, facial biometric reference locks (e.g. Image 1 locks), strictly solo / couple rules, camera framing, lighting, room environment, and photographic quality tags.
-5. OUTPUT FORMAT:
+7. OUTPUT FORMAT:
    - Return ONLY the final polished English prompt string.
    - Do NOT include markdown code blocks, quotes, apologies, or conversational explanations.`;
 
@@ -2766,15 +2930,17 @@ Output ONLY the English translation without preamble, quotes, explanations, or l
 
   const undressRegex = /\b(lepas|buka|copot|tanggalkan|tanpa|nggak\s+pake|gak\s+pake|ga\s+pake|ngga\s+pake|tidak\s+pakai|gapake)\b.*\b(baju|pakaian|celana|rok|daster|dress|bh|bra|cd|daleman|busana|benang|kain|apa)\b|\b(telanjang|bugil|naked|nude|undress|undressed|strip|stripped|topless|bottomless|bare\s+skin|bare\s+body|mandi|shower|bathtub)\b/i;
 
-  const initialExplicitUndress = undressRegex.test(combinedTextForCheck) || undressKeywords.some(kw => combinedTextForCheck.includes(kw));
-  let isExplicitUndress = initialExplicitUndress;
-  if (initialExplicitUndress) {
-    isExplicitUndress = await evaluateUndressIntentWithAI(combinedTextForCheck, undefined, userProfile);
+  const garmentStatus = await evaluateGarmentStatusWithAI(combinedTextForCheck, effectiveUserProfile);
+  const isPartialAdjustment = garmentStatus.isPartialAdjustment;
+
+  let isExplicitUndress = false;
+  if (!isPartialAdjustment) {
+    isExplicitUndress = garmentStatus.isTopless || garmentStatus.isBottomless || garmentStatus.isFullUndress;
   }
 
   const outfitChangeRegex = /\b(ganti|pake|pakai|mengenakan|memakai|berbusana)\b.*\b(baju|pakaian|outfit|daster|dress|piyama|pajamas|kaos|tshirt|t-shirt|tanktop|tank\s+top|croptop|crop\s+top|bikini|lingerie|swimsuit|renang|kemeja|blouse|sweater|hoodie|kebaya|seragam|kostum|hotpants|hot\s+pants|legging|rok|celana|jeans)\b/i;
 
-  const isExplicitOutfitChange = !isExplicitUndress && (outfitChangeRegex.test(lowCaption) || outfitChangeKeywords.some(kw => lowCaption.includes(kw)));
+  const isExplicitOutfitChange = !isExplicitUndress && !isPartialAdjustment && (outfitChangeRegex.test(lowCaption) || outfitChangeKeywords.some(kw => lowCaption.includes(kw)));
 
   // 1. Analisa PAP sebelumnya (Pakaian murni & Ruangan murni) atau siapkan First PAP Context
   let previousPapAnalysis: PreviousPapAnalysis | null = null;
@@ -2798,8 +2964,8 @@ Output ONLY the English translation without preamble, quotes, explanations, or l
   );
 
   // Jika PAP sebelumnya sudah telanjang dan user TIDAK meminta ganti baju baru -> Pertahankan kontinuitas tanpa busana (nudity continuity)
-  const isNudeContinuity = hasPreviousPap && isPreviousPapNude && !isExplicitOutfitChange && !hasOutfitRef;
-  const isEffectiveUndress = isExplicitUndress || isNudeContinuity;
+  const isNudeContinuity = hasPreviousPap && isPreviousPapNude && !isExplicitOutfitChange && !hasOutfitRef && !isPartialAdjustment;
+  const isEffectiveUndress = !isPartialAdjustment && (isExplicitUndress || isNudeContinuity);
 
   // 4. Logika PAP Pertama (Chat pertama tanpa riwayat PAP)
   const firstPapContext = !hasPreviousPap ? generateFirstPapContext(rawCaption, isAgentMale) : null;
@@ -2809,41 +2975,19 @@ Output ONLY the English translation without preamble, quotes, explanations, or l
   const previousOutfitHint = analyzedOutfit ? ` (Outfit: ${analyzedOutfit})` : '';
 
   // Deteksi Granular Kategori Undress (Bottom-Only, Top-Only, atau Full Undress)
-  const bottomUndressKeywords = [
-    'buka celana', 'lepas celana', 'copot celana', 'turunkan celana', 'turunin celana', 'tarik celana',
-    'buka rok', 'lepas rok', 'copot rok', 'tanpa celana', 'tanpa rok', 'bottomless',
-    'buka cd', 'lepas cd', 'copot cd', 'tanpa cd', 'buka celana dalam', 'lepas celana dalam',
-    'gapake celana', 'gak pake celana', 'nggak pake celana', 'ga pake celana', 'tidak pakai celana',
-    'take off pants', 'remove pants', 'remove shorts', 'take off shorts', 'remove skirt', 'take off skirt'
-  ];
-  const topUndressKeywords = [
-    'buka baju', 'lepas baju', 'copot baju', 'buka kaos', 'lepas kaos', 'copot kaos',
-    'buka atasan', 'lepas atasan', 'copot atasan', 'buka kemeja', 'lepas kemeja', 'copot kemeja',
-    'buka tanktop', 'lepas tanktop', 'copot tanktop', 'buka crop top', 'lepas crop top',
-    'buka bra', 'lepas bra', 'copot bra', 'buka bh', 'lepas bh', 'copot bh', 'topless',
-    'tanpa baju', 'tanpa kaos', 'tanpa atasan', 'tanpa bra', 'tanpa bh',
-    'gapake baju', 'gak pake baju', 'nggak pake baju', 'ga pake baju', 'tidak pakai baju',
-    'take off shirt', 'remove shirt', 'take off top', 'remove top', 'remove bra', 'take off bra'
-  ];
-
-  const lowUserMsg = lastUserMsg.toLowerCase();
-  const isUserBottomUndress = bottomUndressKeywords.some(kw => lowUserMsg.includes(kw));
-  const isUserTopUndress = topUndressKeywords.some(kw => lowUserMsg.includes(kw));
-  const isUserFullUndress = lowUserMsg.includes('semua') || lowUserMsg.includes('telanjang') || lowUserMsg.includes('bugil') || lowUserMsg.includes('naked') || lowUserMsg.includes('nude') || (isUserBottomUndress && isUserTopUndress);
-
   let isBottomOnlyUndress = false;
   let isTopOnlyUndress = false;
+  let isFullUndress = false;
 
-  if (isUserBottomUndress && !isUserTopUndress && !isUserFullUndress) {
-    isBottomOnlyUndress = true;
-  } else if (isUserTopUndress && !isUserBottomUndress && !isUserFullUndress) {
-    isTopOnlyUndress = true;
-  } else {
-    isBottomOnlyUndress = isExplicitUndress && bottomUndressKeywords.some(kw => combinedTextForCheck.includes(kw)) && !topUndressKeywords.some(kw => combinedTextForCheck.includes(kw)) && !combinedTextForCheck.includes('semua') && !combinedTextForCheck.includes('telanjang') && !combinedTextForCheck.includes('bugil');
-    isTopOnlyUndress = isExplicitUndress && topUndressKeywords.some(kw => combinedTextForCheck.includes(kw)) && !bottomUndressKeywords.some(kw => combinedTextForCheck.includes(kw)) && !combinedTextForCheck.includes('semua') && !combinedTextForCheck.includes('telanjang') && !combinedTextForCheck.includes('bugil');
+  if (!isPartialAdjustment && isEffectiveUndress) {
+    if (garmentStatus.isBottomless) {
+      isBottomOnlyUndress = true;
+    } else if (garmentStatus.isTopless) {
+      isTopOnlyUndress = true;
+    } else {
+      isFullUndress = true;
+    }
   }
-
-  const isFullUndress = isExplicitUndress && !isBottomOnlyUndress && !isTopOnlyUndress;
 
   // Garment breakdown dari AI Vision (jika tersedia) atau fallback ekstraksi teks
   const fallbackBreakdown = extractGarmentParts(analyzedOutfit);
@@ -2943,42 +3087,44 @@ Output ONLY the English translation without preamble, quotes, explanations, or l
   const EXPRESSION_CLAUSE = getExpressionClauseForContext(convContext);
 
   let UNDRESS_PROMPT = "";
-  if (isBottomOnlyUndress) {
-    if (isDress) {
-      const dressRemovalClause = isHandledInitially
-        ? `${agentPossessive} removed 1-piece dress (${dressGarment}) is held in ${agentPossessive} hand`
-        : `${agentPossessive} discarded ${dressGarment} (1 piece) is neatly placed ${placementSpot}`;
-      UNDRESS_PROMPT = `PARTIAL UNDRESS (BOTTOM REMOVED): Character 1 has pulled up or removed ${agentPossessive} 1-piece dress (${dressGarment}). ${agentPossessive.charAt(0).toUpperCase() + agentPossessive.slice(1)} hips and legs are natural bare skin. ${dressRemovalClause}. Expression and pose: ${EXPRESSION_CLAUSE} Room setting: ${analyzedRoom}`;
+  if (!isPartialAdjustment && isEffectiveUndress) {
+    if (isBottomOnlyUndress) {
+      if (isDress) {
+        const dressRemovalClause = isHandledInitially
+          ? `${agentPossessive} removed 1-piece dress (${dressGarment}) is held in ${agentPossessive} hand`
+          : `${agentPossessive} discarded ${dressGarment} (1 piece) is neatly placed ${placementSpot}`;
+        UNDRESS_PROMPT = `PARTIAL UNDRESS (BOTTOM REMOVED): Character 1 has pulled up or removed ${agentPossessive} 1-piece dress (${dressGarment}). ${agentPossessive.charAt(0).toUpperCase() + agentPossessive.slice(1)} hips and legs are natural bare skin. ${dressRemovalClause}. Expression and pose: ${EXPRESSION_CLAUSE} Room setting: ${analyzedRoom}`;
+      } else {
+        const discardedBottomClause = isHandledInitially
+          ? `${agentPossessive} removed ${bottomGarment} (1 piece) is held in ${agentPossessive} hand`
+          : `${agentPossessive} discarded ${bottomGarment} (1 piece) is neatly placed ${placementSpot}`;
+        UNDRESS_PROMPT = `PARTIAL UNDRESS (BOTTOMLESS ONLY): Character 1 is wearing ${agentPossessive} top (${topGarment}) on ${agentPossessive} upper body. ${agentPossessive.charAt(0).toUpperCase() + agentPossessive.slice(1)} hips and legs are natural bare skin. ${discardedBottomClause}. Expression and pose: ${EXPRESSION_CLAUSE} Room setting: ${analyzedRoom}`;
+      }
+    } else if (isTopOnlyUndress) {
+      if (isDress) {
+        const dressRemovalClause = isHandledInitially
+          ? `${agentPossessive} removed 1-piece dress (${dressGarment}) is held in ${agentPossessive} hand`
+          : `${agentPossessive} discarded ${dressGarment} (1 piece) is neatly placed ${placementSpot}`;
+        UNDRESS_PROMPT = `PARTIAL UNDRESS (TOPLESS ONLY): Character 1 has unbuttoned or pulled down ${agentPossessive} 1-piece dress (${dressGarment}). ${agentPossessive.charAt(0).toUpperCase() + agentPossessive.slice(1)} chest and torso are natural bare skin. ${dressRemovalClause}. Expression and pose: ${EXPRESSION_CLAUSE} Room setting: ${analyzedRoom}`;
+      } else {
+        const topPieceText = topCount > 1 ? `${topCount} pieces` : '1 piece';
+        const discardedTopClause = isHandledInitially
+          ? `${agentPossessive} removed ${topGarment} (${topPieceText}) is held in ${agentPossessive} hand`
+          : `${agentPossessive} discarded ${topGarment} (${topPieceText}) is neatly placed ${placementSpot}`;
+        UNDRESS_PROMPT = `PARTIAL UNDRESS (TOPLESS ONLY): Character 1 is wearing ${agentPossessive} bottom (${bottomGarment}) on ${agentPossessive} lower body. ${agentPossessive.charAt(0).toUpperCase() + agentPossessive.slice(1)} chest and torso are natural bare skin. ${discardedTopClause}. Expression and pose: ${EXPRESSION_CLAUSE} Room setting: ${analyzedRoom}`;
+      }
     } else {
-      const discardedBottomClause = isHandledInitially
-        ? `${agentPossessive} removed ${bottomGarment} (1 piece) is held in ${agentPossessive} hand`
-        : `${agentPossessive} discarded ${bottomGarment} (1 piece) is neatly placed ${placementSpot}`;
-      UNDRESS_PROMPT = `PARTIAL UNDRESS (BOTTOMLESS ONLY): Character 1 is wearing ${agentPossessive} top (${topGarment}) on ${agentPossessive} upper body. ${agentPossessive.charAt(0).toUpperCase() + agentPossessive.slice(1)} hips and legs are natural bare skin. ${discardedBottomClause}. Expression and pose: ${EXPRESSION_CLAUSE} Room setting: ${analyzedRoom}`;
+      let discardedFullClause = "";
+      if (isHandledInitially) {
+        discardedFullClause = `${agentPossessive} removed outfit is held in ${agentPossessive} hand`;
+      } else if (isDress) {
+        discardedFullClause = `${agentPossessive} discarded ${dressGarment} (1 piece) is neatly placed ${placementSpot}`;
+      } else {
+        const topPieceText = topCount > 1 ? `${topCount} pieces` : '1 piece';
+        discardedFullClause = `${agentPossessive} discarded ${topGarment} (${topPieceText}) and discarded ${bottomGarment} (1 piece) is neatly placed ${placementSpot}`;
+      }
+      UNDRESS_PROMPT = `FULL UNDRESS: Character 1 is completely undressed (100% natural bare skin). ${discardedFullClause}. Expression and pose: ${EXPRESSION_CLAUSE} Room setting: ${analyzedRoom}`;
     }
-  } else if (isTopOnlyUndress) {
-    if (isDress) {
-      const dressRemovalClause = isHandledInitially
-        ? `${agentPossessive} removed 1-piece dress (${dressGarment}) is held in ${agentPossessive} hand`
-        : `${agentPossessive} discarded ${dressGarment} (1 piece) is neatly placed ${placementSpot}`;
-      UNDRESS_PROMPT = `PARTIAL UNDRESS (TOPLESS ONLY): Character 1 has unbuttoned or pulled down ${agentPossessive} 1-piece dress (${dressGarment}). ${agentPossessive.charAt(0).toUpperCase() + agentPossessive.slice(1)} chest and torso are natural bare skin. ${dressRemovalClause}. Expression and pose: ${EXPRESSION_CLAUSE} Room setting: ${analyzedRoom}`;
-    } else {
-      const topPieceText = topCount > 1 ? `${topCount} pieces` : '1 piece';
-      const discardedTopClause = isHandledInitially
-        ? `${agentPossessive} removed ${topGarment} (${topPieceText}) is held in ${agentPossessive} hand`
-        : `${agentPossessive} discarded ${topGarment} (${topPieceText}) is neatly placed ${placementSpot}`;
-      UNDRESS_PROMPT = `PARTIAL UNDRESS (TOPLESS ONLY): Character 1 is wearing ${agentPossessive} bottom (${bottomGarment}) on ${agentPossessive} lower body. ${agentPossessive.charAt(0).toUpperCase() + agentPossessive.slice(1)} chest and torso are natural bare skin. ${discardedTopClause}. Expression and pose: ${EXPRESSION_CLAUSE} Room setting: ${analyzedRoom}`;
-    }
-  } else {
-    let discardedFullClause = "";
-    if (isHandledInitially) {
-      discardedFullClause = `${agentPossessive} removed outfit is held in ${agentPossessive} hand`;
-    } else if (isDress) {
-      discardedFullClause = `${agentPossessive} discarded ${dressGarment} (1 piece) is neatly placed ${placementSpot}`;
-    } else {
-      const topPieceText = topCount > 1 ? `${topCount} pieces` : '1 piece';
-      discardedFullClause = `${agentPossessive} discarded ${topGarment} (${topPieceText}) and discarded ${bottomGarment} (1 piece) is neatly placed ${placementSpot}`;
-    }
-    UNDRESS_PROMPT = `FULL UNDRESS: Character 1 is completely undressed (100% natural bare skin). ${discardedFullClause}. Expression and pose: ${EXPRESSION_CLAUSE} Room setting: ${analyzedRoom}`;
   }
 
   // Referensi outfit lama HANYA dilanjutkan jika user meminta PAP lanjutan tanpa perintah lepas baju atau ganti pakaian baru
@@ -3196,7 +3342,14 @@ Retain the EXACT SAME LOCATION/SETTING with previous PAP (${analyzedRoom}). Char
       : `- STRICTLY SOLO: ${isAgentMale ? 'NO FEMALES' : 'NO MALES'}, NO COMPANION. Character 1 is ALONE.`;
 
     let outfitTransitionInstruction = "";
-    if (isEffectiveUndress) {
+    if (isPartialAdjustment) {
+      outfitTransitionInstruction = `
+      - OUTFIT CONDITION (PARTIAL ADJUSTMENT / EXPOSURE WHILE WEARING CLOTHES):
+        * USER INTENT: The user requested partial exposure/adjustment while keeping clothes on body: "${rawCaption}".
+        * Character 1 is STILL WEARING ${agentPossessive} outfit (${analyzedOutfit}) on ${agentPossessive} body.
+        * The garment is partially unbuttoned, shifted, pulled down, lifted up, or unzipped as requested (${garmentStatus.actionDescription}), exposing bare skin naturally (e.g. cleavage, chest, thighs, or waist).
+        * ABSOLUTE CRITICAL RULE (ZERO DISCARDED CLOTHES): The garment is STILL ON THE BODY. DO NOT render, describe, or place any discarded garments, dropped clothes, or empty clothes on the bed, sofa, or floor. The background/furniture MUST be 100% clean and free of discarded garments.`;
+    } else if (isEffectiveUndress) {
       if (isBottomOnlyUndress) {
         if (isDress) {
           outfitTransitionInstruction = `
