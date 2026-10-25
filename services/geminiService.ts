@@ -1,5 +1,5 @@
 
-import { GoogleGenAI, Modality, ThinkingLevel } from "@google/genai";
+import { GoogleGenAI, Modality, ThinkingLevel, Type } from "@google/genai";
 import { AgentConfig, Attachment, ChatMessage, UserProfile } from "../types";
 import { convertPcmToMp3, addMetadataToMp3 } from "./audioMetadata";
 import { getStoredGlobalGeminiSettings, getEffectiveGlobalGeminiSettings, DEFAULT_GLOBAL_GEMINI_SETTINGS, DEFAULT_QWEN_SPACE_URL, DEFAULT_WAN_VIDEO_SPACE_URL } from "./dbService";
@@ -1537,7 +1537,17 @@ export const evaluateGarmentStatusWithAI = async (
   textInput: string,
   userProfile?: UserProfile
 ): Promise<GarmentStatusAnalysis> => {
-  const low = (textInput || '').toLowerCase();
+  const low = (textInput || '').toLowerCase().trim();
+  if (!low) {
+    return {
+      status: 'CLOTHED_FULL',
+      isPartialAdjustment: false,
+      isTopless: false,
+      isBottomless: false,
+      isFullUndress: false,
+      actionDescription: ''
+    };
+  }
 
   const partialAdjustKeywords = [
     'singkap', 'menyibakkan', 'sibakkan', 'singkapkan', 'angkat rok', 'angkat gaun', 'angkat daster',
@@ -1552,16 +1562,72 @@ export const evaluateGarmentStatusWithAI = async (
     'showing thighs', 'showing cleavage', 'partially unbuttoned', 'partially unzipped', 'lowered zipper', 'pulled aside'
   ];
 
+  const completeToplessKeywords = ['lepas baju total', 'copot baju total', 'lepas kaos total', 'copot kaos total', 'topless total', 'lepas bra total', 'copot bra total', 'lepas bh total'];
+  const completeBottomlessKeywords = ['lepas celana total', 'copot celana total', 'lepas rok total', 'copot rok total', 'bottomless total', 'lepas cd total'];
+  const completeNudeKeywords = ['telanjang bulat', 'bugil total', 'full naked', 'full nude', 'tanpa busana total', 'tanpa sehelai benang pun', 'polos tanpa busana'];
+
   const hasPartialKeywords = partialAdjustKeywords.some(kw => low.includes(kw));
-
-  const completeToplessKeywords = ['lepas baju', 'copot baju', 'lepas kaos', 'copot kaos', 'lepas atasan', 'lepas bra', 'lepas bh', 'copot bra', 'copot bh', 'topless', 'bare chest', 'bare upper body'];
-  const completeBottomlessKeywords = ['lepas celana', 'copot celana', 'lepas rok', 'copot rok', 'lepas cd', 'copot cd', 'lepas celana dalam', 'bottomless', 'bare lower body'];
-  const completeNudeKeywords = ['telanjang', 'bugil', 'naked', 'nude', 'full nude', 'tanpa busana', 'tanpa sehelai benang', 'lepas semua', 'buka semua baju', 'polos tanpa busana'];
-
+  const hasCompleteNude = completeNudeKeywords.some(kw => low.includes(kw));
   const hasCompleteTopless = completeToplessKeywords.some(kw => low.includes(kw));
   const hasCompleteBottomless = completeBottomlessKeywords.some(kw => low.includes(kw));
-  const hasCompleteNude = completeNudeKeywords.some(kw => low.includes(kw));
 
+  // =========================================================================
+  // FAST-PATH HEURISTIC (0ms Latency) - Kategori Mutlak
+  // Jika terdeteksi kata penyesuaian parsial DAN tidak ada kata bugil total
+  // -> Langsung kuncikan sebagai CLOTHED_ADJUSTED tanpa tunggu LLM!
+  // =========================================================================
+  if (hasPartialKeywords && !hasCompleteNude && !hasCompleteTopless && !hasCompleteBottomless) {
+    console.log("[GarmentStatus Hybrid] Fast-Path Heuristic Matched: CLOTHED_ADJUSTED (0ms)");
+    return {
+      status: 'CLOTHED_ADJUSTED',
+      isPartialAdjustment: true,
+      isTopless: false,
+      isBottomless: false,
+      isFullUndress: false,
+      actionDescription: 'wearing her outfit with partial adjustment revealing skin'
+    };
+  }
+
+  if (hasCompleteNude && !hasPartialKeywords) {
+    console.log("[GarmentStatus Hybrid] Fast-Path Heuristic Matched: FULL_UNDRESS (0ms)");
+    return {
+      status: 'FULL_UNDRESS',
+      isPartialAdjustment: false,
+      isTopless: false,
+      isBottomless: false,
+      isFullUndress: true,
+      actionDescription: 'completely undressed natural bare skin'
+    };
+  }
+
+  if (hasCompleteTopless && !hasCompleteBottomless && !hasPartialKeywords) {
+    console.log("[GarmentStatus Hybrid] Fast-Path Heuristic Matched: TOPLESS (0ms)");
+    return {
+      status: 'TOPLESS',
+      isPartialAdjustment: false,
+      isTopless: true,
+      isBottomless: false,
+      isFullUndress: false,
+      actionDescription: 'topless with upper body bare skin'
+    };
+  }
+
+  if (hasCompleteBottomless && !hasCompleteTopless && !hasPartialKeywords) {
+    console.log("[GarmentStatus Hybrid] Fast-Path Heuristic Matched: BOTTOMLESS (0ms)");
+    return {
+      status: 'BOTTOMLESS',
+      isPartialAdjustment: false,
+      isTopless: false,
+      isBottomless: true,
+      isFullUndress: false,
+      actionDescription: 'bottomless with lower body bare skin'
+    };
+  }
+
+  // =========================================================================
+  // AI LLM CLASSIFICATION (Untuk Kalimat Ambigu / Bahasa Gaul / Complex)
+  // Menggunakan Gemini dengan Structured Output Schema (responseSchema)
+  // =========================================================================
   try {
     const ai = createGeminiClient(userProfile);
     const model = getActiveTextModel(userProfile) || "gemini-3.1-flash-lite";
@@ -1576,29 +1642,36 @@ Determine if the garment is:
 5. "CLOTHED_FULL": Fully clothed normally.
 
 CRITICAL DISCARDED RULE:
-If the clothing is STILL WORN ON THE BODY in an adjusted/opened state (CLOTHED_ADJUSTED), it must NEVER be classified as TOPLESS/BOTTOMLESS/FULL_UNDRESS because classifying it as topless/bottomless will wrongly trigger a discarded garment prop on the floor/sofa and cause a duplicate clothing bug!
-
-Return ONLY valid JSON:
-{
-  "status": "CLOTHED_ADJUSTED" | "TOPLESS" | "BOTTOMLESS" | "FULL_UNDRESS" | "CLOTHED_FULL",
-  "actionDescription": "short 1-line English photographic prompt instruction"
-}`;
+If the clothing is STILL WORN ON THE BODY in an adjusted/opened state (CLOTHED_ADJUSTED), it must NEVER be classified as TOPLESS/BOTTOMLESS/FULL_UNDRESS because classifying it as topless/bottomless will wrongly trigger a discarded garment prop on the floor/sofa and cause a duplicate clothing bug!`;
 
     const res = await ai.models.generateContent({
       model,
       contents: [{ parts: [{ text: classificationPrompt }] }],
       config: {
         temperature: 0.1,
-        maxOutputTokens: 250,
+        maxOutputTokens: 200,
         responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            status: {
+              type: Type.STRING,
+              description: "The garment status enum"
+            },
+            actionDescription: {
+              type: Type.STRING,
+              description: "Short 1-line English photographic prompt instruction"
+            }
+          },
+          required: ["status", "actionDescription"]
+        },
         safetySettings: safetySettings as any
       }
     });
 
     const text = res.text?.trim() || '';
-    const cleaned = text.replace(/^```json\s*|```$/g, '').trim();
-    if (cleaned.startsWith('{')) {
-      const parsed = JSON.parse(cleaned);
+    if (text.startsWith('{')) {
+      const parsed = JSON.parse(text);
       const status = parsed.status || 'CLOTHED_FULL';
       const actionDesc = parsed.actionDescription || '';
 
@@ -1644,9 +1717,10 @@ Return ONLY valid JSON:
       }
     }
   } catch (err) {
-    console.warn("[evaluateGarmentStatusWithAI] Gemini evaluation fallback:", err);
+    console.warn("[evaluateGarmentStatusWithAI] Gemini evaluation fallback to heuristics:", err);
   }
 
+  // Fallback Heuristics jika API gagal:
   if (hasPartialKeywords && !hasCompleteNude && !hasCompleteTopless && !hasCompleteBottomless) {
     return {
       status: 'CLOTHED_ADJUSTED',
@@ -1666,28 +1740,6 @@ Return ONLY valid JSON:
       isBottomless: false,
       isFullUndress: true,
       actionDescription: 'completely undressed natural bare skin'
-    };
-  }
-
-  if (hasCompleteTopless && !hasCompleteBottomless && !hasPartialKeywords) {
-    return {
-      status: 'TOPLESS',
-      isPartialAdjustment: false,
-      isTopless: true,
-      isBottomless: false,
-      isFullUndress: false,
-      actionDescription: 'topless with upper body bare skin'
-    };
-  }
-
-  if (hasCompleteBottomless && !hasCompleteTopless && !hasPartialKeywords) {
-    return {
-      status: 'BOTTOMLESS',
-      isPartialAdjustment: false,
-      isTopless: false,
-      isBottomless: true,
-      isFullUndress: false,
-      actionDescription: 'bottomless with lower body bare skin'
     };
   }
 
@@ -3059,8 +3111,18 @@ Output ONLY the English translation without preamble, quotes, explanations, or l
   const detectConversationContext = (history: ChatMessage[], currentInput: string): 'NORMAL' | 'SENSUAL' | 'INTENSE' => {
     const combined = `${currentInput} ${history.slice(-3).map(m => m.text).join(' ')}`.toLowerCase();
     
-    const intenseKeywords = ['klimaks', 'puncak', 'crot', 'keluar', 'masukin', 'dalam', 'gila', 'nikmat', 'puas', 'orgasm', 'fuck', 'ngentot', 'ngewe', 'sange banget', 'pake banget'];
-    const sensualKeywords = ['sensual', 'sange', 'hot', 'mau', 'pegang', 'sentuh', 'jilat', 'puting', 'klitoris', 'cium', 'bibir', 'badan', 'telanjang', 'buka', 'peluk', 'mesra', 'gombal', 'rayu', 'nakal', 'nakal ya'];
+    // Kata kunci WAJIB eksplisit untuk aktifitas fisik seksual / penetrasi / klimaks
+    const intenseKeywords = [
+      'klimaks', 'puncak klimaks', 'crot', 'orgasm', 'orgasme', 'fuck', 'fucking',
+      'ngentot', 'ngewe', 'berhubungan seks', 'penetrasi', 'intercourse', 'making love', 'sex action'
+    ];
+
+    // Kata kunci untuk suasana sensual / pose / bugil / telanjang
+    const sensualKeywords = [
+      'sensual', 'sange', 'hot', 'mau', 'pegang', 'sentuh', 'jilat', 'puting', 'klitoris',
+      'cium', 'bibir', 'badan', 'telanjang', 'bugil', 'nude', 'naked', 'topless', 'bottomless',
+      'buka', 'peluk', 'mesra', 'gombal', 'rayu', 'nakal', 'pamer', 'cleavage'
+    ];
 
     if (intenseKeywords.some(kw => combined.includes(kw))) {
       return 'INTENSE';
@@ -3084,7 +3146,9 @@ Output ONLY the English translation without preamble, quotes, explanations, or l
   };
 
   const convContext = detectConversationContext(history, combinedTextForCheck);
-  const EXPRESSION_CLAUSE = getExpressionClauseForContext(convContext);
+  // Jika polos/telanjang/topless/bottomless/tersingkap TANPA aktifitas seksual fisik, paksa ke SENSUAL (ekspresi sensual ringan), BUKAN INTENSE (klimaks)!
+  const effectiveContext = (convContext === 'NORMAL' && (isEffectiveUndress || isPartialAdjustment)) ? 'SENSUAL' : convContext;
+  const EXPRESSION_CLAUSE = getExpressionClauseForContext(effectiveContext);
 
   let UNDRESS_PROMPT = "";
   if (!isPartialAdjustment && isEffectiveUndress) {
