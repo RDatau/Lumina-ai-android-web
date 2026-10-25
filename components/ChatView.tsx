@@ -1196,19 +1196,32 @@ const ChatView: React.FC<ChatViewProps> = ({
     triggerNewMessageNotification(config.name, finalCommentary, 'video' as any, config.profilePic);
   };
 
+  const mediaItemsToUse = useMemo(() => {
+    if (!previewMedia) return allMediaItems;
+    const isAudioPreview = previewMedia.type === 'audio' || previewMedia.mimeType?.startsWith('audio/');
+    if (isAudioPreview) {
+      return allMediaItems.filter(item => item.type === 'audio' || item.mimeType?.startsWith('audio/'));
+    }
+    const isVideoPreview = previewMedia.type === 'video' || previewMedia.mimeType?.startsWith('video/');
+    if (isVideoPreview) {
+      return allMediaItems.filter(item => item.type === 'video' || item.mimeType?.startsWith('video/'));
+    }
+    return allMediaItems.filter(item => item.type === 'image' || item.type === 'video' || item.mimeType?.startsWith('image/') || item.mimeType?.startsWith('video/'));
+  }, [allMediaItems, previewMedia]);
+
   const currentMediaIndex = useMemo(() => {
     if (!previewMedia) return -1;
-    const exactMatch = allMediaItems.findIndex(item => item.id === previewMedia.id && item.data === previewMedia.data);
+    const exactMatch = mediaItemsToUse.findIndex(item => item.id === previewMedia.id && item.data === previewMedia.data);
     if (exactMatch !== -1) return exactMatch;
-    const dataMatch = allMediaItems.findIndex(item => item.data === previewMedia.data);
+    const dataMatch = mediaItemsToUse.findIndex(item => item.data === previewMedia.data);
     if (dataMatch !== -1) return dataMatch;
-    const idMatch = allMediaItems.findIndex(item => item.id === previewMedia.id);
+    const idMatch = mediaItemsToUse.findIndex(item => item.id === previewMedia.id);
     return idMatch;
-  }, [previewMedia, allMediaItems]);
+  }, [previewMedia, mediaItemsToUse]);
 
   const handleNextMedia = () => {
-    if (currentMediaIndex < allMediaItems.length - 1) {
-      const next = allMediaItems[currentMediaIndex + 1];
+    if (currentMediaIndex < mediaItemsToUse.length - 1) {
+      const next = mediaItemsToUse[currentMediaIndex + 1];
       setPreviewMedia({ 
         id: next.id, 
         name: next.name, 
@@ -1221,7 +1234,7 @@ const ChatView: React.FC<ChatViewProps> = ({
 
   const handlePrevMedia = () => {
     if (currentMediaIndex > 0) {
-      const prev = allMediaItems[currentMediaIndex - 1];
+      const prev = mediaItemsToUse[currentMediaIndex - 1];
       setPreviewMedia({ 
         id: prev.id, 
         name: prev.name, 
@@ -4007,14 +4020,14 @@ const ChatView: React.FC<ChatViewProps> = ({
               <div className="flex flex-col">
                 <p className="text-[11px] sm:text-xs font-black uppercase tracking-[0.3em] text-white/70 truncate max-w-[200px] sm:max-w-md">{previewMedia.name}</p>
                 {currentMediaIndex !== -1 && (
-                  <p className="text-[9px] sm:text-[10px] font-bold text-white/40 uppercase tracking-widest mt-0.5">{currentMediaIndex + 1} dari {allMediaItems.length}</p>
+                  <p className="text-[9px] sm:text-[10px] font-bold text-white/40 uppercase tracking-widest mt-0.5">{currentMediaIndex + 1} dari {mediaItemsToUse.length}</p>
                 )}
               </div>
               <div className="flex items-center gap-2">
-                 {allMediaItems[currentMediaIndex]?.type === 'image' && (
+                 {mediaItemsToUse[currentMediaIndex]?.type === 'image' && (
                    <button 
                     onClick={() => {
-                      const currentItem = allMediaItems[currentMediaIndex];
+                      const currentItem = mediaItemsToUse[currentMediaIndex];
                       const sourceMsg = activeThread.find(m => m.id === currentItem?.id);
                       setImageInfoData({
                         isOpen: true,
@@ -4243,7 +4256,7 @@ const ChatView: React.FC<ChatViewProps> = ({
                   transitionProperty: isDraggingMedia ? 'none' : 'transform'
                 }}
                >
-                 {allMediaItems.map((item, i) => (
+                 {mediaItemsToUse.map((item, i) => (
                    <div key={i} className="w-full h-full flex-shrink-0 flex items-center justify-center relative overflow-hidden">
                      {item.type === 'image' ? (
                        <div 
@@ -4536,7 +4549,7 @@ const ChatView: React.FC<ChatViewProps> = ({
             {/* Footer Navigation (< SWIPE >) - Menyesuaikan Mobile & Desktop (WIDE) */}
             <div className="w-full flex justify-between items-center py-2.5 px-4 sm:px-6 pb-[max(0.625rem,env(safe-area-inset-bottom))] bg-[#0a0f14] border-t border-white/10 shadow-2xl shrink-0 z-30">
                <div className="text-[9px] font-bold text-white/30 uppercase tracking-widest hidden sm:block truncate max-w-[200px]">
-                  {allMediaItems[currentMediaIndex]?.fileName || previewMedia.name}
+                  {mediaItemsToUse[currentMediaIndex]?.fileName || previewMedia.name}
                </div>
                <div className="flex items-center justify-center gap-2 mx-auto sm:mx-0 opacity-40 hover:opacity-80 transition-opacity">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
@@ -4544,7 +4557,7 @@ const ChatView: React.FC<ChatViewProps> = ({
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
                </div>
                <div className="text-[9px] font-bold text-white/30 uppercase tracking-widest hidden sm:block text-right">
-                  {currentMediaIndex + 1} / {allMediaItems.length}
+                  {currentMediaIndex + 1} / {mediaItemsToUse.length}
                </div>
             </div>
           </div>

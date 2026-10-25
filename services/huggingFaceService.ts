@@ -472,7 +472,8 @@ const uploadToGradio = async (spaceHost: string, dataUrl: string, token?: string
 
     const uploadEndpoints = [
       `${spaceHost}/gradio_api/upload`,
-      `${spaceHost}/upload`
+      `${spaceHost}/upload`,
+      `${spaceHost}/api/upload`
     ];
 
     for (const ep of uploadEndpoints) {
@@ -490,21 +491,32 @@ const uploadToGradio = async (spaceHost: string, dataUrl: string, token?: string
 
         if (resp && resp.ok) {
           const text = await resp.text();
-          if (text.startsWith('[')) {
-            const data = JSON.parse(text);
-            if (Array.isArray(data) && data.length > 0) {
-              const item = data[0];
-              const filePath = typeof item === 'string' ? item : (item?.path || item?.name || '');
-              const fileUrl = typeof item === 'object' && item?.url ? item.url : `${spaceHost}/gradio_api/file=${filePath}`;
-              return {
-                path: filePath,
-                url: fileUrl,
-                orig_name: 'input_image.png',
-                size: blob.size,
-                mime_type: mime,
-                meta: { _type: 'gradio.FileData' }
-              };
-            }
+          let data: any = null;
+          try {
+            data = JSON.parse(text);
+          } catch (e) {}
+
+          let filePath = '';
+          if (Array.isArray(data) && data.length > 0) {
+            const item = data[0];
+            filePath = typeof item === 'string' ? item : (item?.path || item?.name || item?.url || '');
+          } else if (data && typeof data === 'object') {
+            filePath = data.path || data.name || data.url || (Array.isArray(data.files) ? data.files[0] : '');
+          } else if (typeof data === 'string') {
+            filePath = data;
+          }
+
+          if (filePath) {
+            const cleanPath = filePath.replace(/^https?:\/\/[^\/]+/, '');
+            const fileUrl = cleanPath.startsWith('http') ? cleanPath : `${spaceHost}${cleanPath.startsWith('/') ? cleanPath : `/gradio_api/file=${cleanPath}`}`;
+            return {
+              path: cleanPath,
+              url: fileUrl,
+              orig_name: 'input_image.png',
+              size: blob.size,
+              mime_type: mime,
+              meta: { _type: 'gradio.FileData' }
+            };
           }
         }
       } catch (err) {}
@@ -1062,6 +1074,9 @@ export const generateWithHuggingFaceSpace = async (
       let formattedImage: any = null;
       if (inputImage) {
         formattedImage = await uploadToGradio(spaceHost, inputImage, tokenToUse);
+        if (formattedImage && typeof formattedImage === 'object' && !formattedImage.path) {
+          formattedImage = inputImage; // Fallback ke dataUrl string jika upload path tidak tersedia
+        }
       }
 
       let formattedExtraRef: any = null;
@@ -1093,14 +1108,39 @@ export const generateWithHuggingFaceSpace = async (
         onStatusUpdate?.("Seluruh referensi gambar terunggah. Menghubungkan ke Space ZeroGPU...");
       }
 
+      const allExtraImages: any[] = [];
+      const rawExtraList = [formattedExtraRef, ...formattedGallery].filter(Boolean);
+      for (const item of rawExtraList.slice(0, 9)) {
+        if (typeof item === 'object' && item !== null) {
+          const pathVal = item.path || item.url || null;
+          if (pathVal) {
+            allExtraImages.push({ image: item, caption: null });
+          }
+        } else if (typeof item === 'string') {
+          allExtraImages.push({
+            image: {
+              path: item.startsWith('/') ? item : null,
+              url: item.startsWith('http') ? item : `${spaceHost}/gradio_api/file=${item}`,
+              orig_name: 'ref_image.png',
+              meta: { _type: 'gradio.FileData' }
+            },
+            caption: null
+          });
+        }
+      }
+
       // Bangun payload data dinamis berdasarkan skema komponen Space
       payloadData = [];
+
+      const baseImgPayload = typeof formattedImage === 'object' && formattedImage !== null
+        ? formattedImage
+        : (formattedImage || inputImage);
 
       if (spaceHost.includes('felyahuhing-qwen-image-21-uncensored') || inputComponents.length === 7 || endpoint === '/edit') {
         payloadData = [
           effectivePrompt,
-          formattedImage || null,
-          null,
+          baseImgPayload || null,
+          allExtraImages.length > 0 ? allExtraImages : null,
           28,
           0,
           true,
