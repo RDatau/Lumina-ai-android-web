@@ -1872,7 +1872,7 @@ export const analyzePreviousPapImage = async (
             parts: [
               {
                 text: `Analyze this image with 100% forensic precision. Return a strict valid JSON object with the following fields:
-1. "topGarment": Describe ONLY the upper body clothing (atasan). State exact primary color, fabric texture, cut (e.g. "one white strapless ribbed crop top", "one black lace tube top", "one pink cotton tank top"), and whether it is 1 single piece or 2 pieces if layered with jacket/cardigan/outerwear (e.g. "one white strapless crop top layered under one blue denim jacket"). If wearing a one-piece dress or unclothed, output empty string "".
+1. "topGarment": Describe ONLY the upper body clothing (atasan). State exact primary color, fabric texture, cut, and whether it is 1 single piece (e.g. "one white ribbed tank top") or 2 pieces if layered with jacket/cardigan/outerwear (e.g. "one white tank top layered under one blue denim jacket"). If wearing a one-piece dress or unclothed, output empty string "".
 2. "topCount": Integer representing the exact piece count of the top clothing: 1 if single piece (e.g. tank top only), 2 if layered (e.g. tank top layered with jacket/cardigan), or 0 if none/dress.
 3. "bottomGarment": Describe ONLY the lower body clothing (bawahan), strictly 1 piece (e.g. "one pair of blue denim shorts", "one light blue denim jeans", "one black pleated mini skirt"). If wearing a one-piece dress or unclothed, output empty string "".
 4. "bottomCount": Integer (1 if wearing bottom shorts/pants/skirt, or 0 if none/dress).
@@ -3248,39 +3248,22 @@ ${identityNote}` });
         const [header, data] = latestPap.image.split(',');
         const mimeType = header.split(':')[1].split(';')[0];
         onStatusUpdate?.("Menyiapkan Image 3 (PAP Sebelumnya)...", { slot: 3, label: "Image 3: Kontinuitas Ruangan & Pakaian", url: latestPap.image });
-
-        if (isPartialAdjustment) {
-          translatorParts.push({ text: `REFERENCE IMAGE 3 (PREVIOUS PAP - HER CURRENT OUTFIT DNA & NLU ACTION ANCHOR):
-1. HER CURRENT OUTFIT DNA (EXAMINE VISUALLY): Reference Image 3 is her CURRENT photo session. Character 1 is STILL WEARING her exact outfit shown in Reference Image 3 (${analyzedOutfit}):
-   - Top Garment: ${topGarment || 'her top/shirt from Image 3'}
-   - Bottom Garment: ${bottomGarment || 'her bottom/pants/skirt from Image 3'}
-   - Dress: ${dressGarment || 'none'}
-2. ABSOLUTE STRICT BANNED SOURCE: Reference Image 3 is the ONLY image to examine for clothing, fabric, and room setting. NEVER, EVER look at Reference Image 1 (Profile Pic) for clothing or fabric! Reference Image 1 is strictly an isolated crop for facial identity ONLY.
-3. MULTIMODAL NLU ACTION TRANSLATION:
-   - User Request: "${englishCaption}" (Raw: "${rawCaption}").
-   - Carefully examine Reference Image 3 visually to identify the exact clothing item she is currently wearing (e.g., strapless crop top, tank top, shirt, dress, jeans, etc., with its exact color, fabric, texture, and cut).
-   - Translate the user's requested gesture/action ("${englishCaption}") so that she actively manipulates THAT SPECIFIC GARMENT from Reference Image 3!
-   - Example: If in Reference Image 3 she is wearing a strapless crop top and user asks to pull shirt down ("tarik baju ke bawah pamer tetek"), describe: "Character 1 is pulling down her exact strapless crop top from Reference Image 3 below her breasts, revealing her bare breasts while the crop top stays shifted down around her midriff/waist".
-   - Maintain 100% fabric texture, color, and design continuity from Reference Image 3.
-4. ZERO DISCARDED CLOTHES RULE: The garment is STILL ON THE BODY in an adjusted state. DO NOT render any discarded clothes on the bed, sofa, or floor.` });
-        } else {
-          translatorParts.push({ text: `REFERENCE IMAGE 3 (PREVIOUS PAP - EXACT SAME LOCATION CONTINUITY & OUTFIT DNA REFERENCE):
+        translatorParts.push({ text: `REFERENCE IMAGE 3 (PREVIOUS PAP - EXACT SAME LOCATION CONTINUITY & DISCARDED CLOTHES REFERENCE):
 1. EXACT SAME LOCATION CONTINUITY: Retain the EXACT SAME LOCATION/SETTING with previous PAP (${analyzedRoom}).
 2. DISCARDED CLOTHES REFERENCE: If Character 1 is changing into the new outfit in Image 2 or stripping, her/his previous outfit was: ${analyzedOutfit}.
 3. STRICT MINIMALIST GARMENT COUNT RULE: Depict strictly ONLY the exact 1 to at most 3 specific pieces of clothing (${analyzedOutfit}) lying neatly ${placementSpot}. NEVER describe a messy laundry pile or excessive scattered fabrics!
 4. STRICT SOURCE RULE: The discarded clothes MUST be the outfit from Image 3 (${analyzedOutfit}), NEVER the clothes from Image 1 (Profile Pic)!` });
-        }
         translatorParts.push({ inlineData: { mimeType, data } });
       }
 
-      // 3. Selalu masukkan PAP 1 / Full-Body PAP sebagai Image 4 (Slot 4) sebagai referensi penunjang detail pakaian dan ruangan awal
+      // 3. Selalu masukkan PAP 1 sebagai Image 4 (Slot 4) sebagai referensi penunjang detail pakaian dan ruangan awal
       if (shouldIncludeOldestPap && oldestPap?.image) {
         const [oldHeader, oldData] = oldestPap.image.split(',');
         const oldMimeType = oldHeader.split(':')[1]?.split(';')[0] || 'image/jpeg';
-        onStatusUpdate?.("Menyiapkan Image 4 (PAP Full-Body/Awal)...", { slot: 4, label: "Image 4: PAP Full-Body/Penunjang Detail Pakaian", url: oldestPap.image });
-        translatorParts.push({ text: `REFERENCE IMAGE 4 (SUPPLEMENTARY FULL-BODY OUTFIT & ROOM ANCHOR):
-1. FULL OUTFIT ANCHOR: If Reference Image 3 (latest PAP) is a close-up photo, crop shot, or does not show the full outfit clearly (top, bottom, dress, or hem), examine THIS image (Image 4) which contains the initial full-body or clear outfit shot of the same session!
-2. COMPLETE OUTFIT CONSISTENCY: Faithfully reference and match the exact clothing details, fabric textures, top/bottom pieces, and full room/environment setting from THIS initial PAP to prevent loss of detail or hallucination. NEVER look at Image 1 (Profile Pic) for clothing!` });
+        onStatusUpdate?.("Menyiapkan Image 4 (PAP 1 Penunjang)...", { slot: 4, label: "Image 4: PAP 1 (Penunjang Detail Pakaian & Ruangan)", url: oldestPap.image });
+        translatorParts.push({ text: `REFERENCE IMAGE 4 (SUPPLEMENTARY REFERENCE - PAP 1 INITIAL FULL DETAILED OUTFIT & ROOM):
+1. As the initial PAP, this image (PAP 1) provides comprehensive full outfit and room details to serve as a reliable anchor.
+2. DETAILED OUTFIT & ROOM ANCHOR: Faithfully reference the exact clothing details, fabric textures, and full room/environment setting from this initial PAP to prevent loss of detail or hallucination.` });
         translatorParts.push({ inlineData: { mimeType: oldMimeType, data: oldData } });
       }
     } else {
@@ -3311,24 +3294,10 @@ ${identityNote}` });
             translatorParts.push({ text: `REFERENCE IMAGE 2 (PREVIOUS PAP - EXACT SAME LOCATION CONTINUITY):
 Retain the EXACT SAME LOCATION/SETTING with previous PAP (${analyzedRoom}). Character 1 remains completely undressed with natural bare skin.` });
           }
-        } else if (isPartialAdjustment) {
-          translatorParts.push({ text: `REFERENCE IMAGE 2 (PREVIOUS PAP - HER CURRENT OUTFIT DNA & NLU ACTION ANCHOR):
-1. HER CURRENT OUTFIT DNA (EXAMINE VISUALLY): Reference Image 2 is her CURRENT photo session. Character 1 is STILL WEARING her exact outfit shown in Reference Image 2 (${analyzedOutfit}):
-   - Top Garment: ${topGarment || 'her top/shirt from Image 2'}
-   - Bottom Garment: ${bottomGarment || 'her bottom/pants/skirt from Image 2'}
-   - Dress: ${dressGarment || 'none'}
-2. ABSOLUTE STRICT BANNED SOURCE: Reference Image 2 is the ONLY image to examine for clothing, fabric, and room setting. NEVER, EVER look at Reference Image 1 (Profile Pic) for clothing or fabric! Reference Image 1 is strictly an isolated crop for facial identity ONLY.
-3. MULTIMODAL NLU ACTION TRANSLATION:
-   - User Request: "${englishCaption}" (Raw: "${rawCaption}").
-   - Carefully examine Reference Image 2 visually to identify the exact clothing item she is currently wearing (e.g., strapless crop top, tank top, shirt, dress, jeans, etc., with its exact color, fabric, texture, and cut).
-   - Translate the user's requested gesture/action ("${englishCaption}") so that she actively manipulates THAT SPECIFIC GARMENT from Reference Image 2!
-   - Example: If in Reference Image 2 she is wearing a strapless crop top and user asks to pull shirt down ("tarik baju ke bawah pamer tetek"), describe: "Character 1 is pulling down her exact strapless crop top from Reference Image 2 below her breasts, revealing her bare breasts while the crop top stays shifted down around her midriff/waist".
-   - Maintain 100% fabric texture, color, and design continuity from Reference Image 2.
-4. ZERO DISCARDED CLOTHES RULE: The garment is STILL ON THE BODY in an adjusted state. DO NOT render any discarded clothes on the bed, sofa, or floor.` });
         } else if (isExplicitOutfitChange) {
           translatorParts.push({ text: `REFERENCE IMAGE 2 (PREVIOUS PAP - ROOM/BACKGROUND ENVIRONMENT CONTINUITY): Retain the continuous room environment and setting from this image, but Character 1 is changing into the new requested outfit.` });
         } else {
-          translatorParts.push({ text: `REFERENCE IMAGE 2 (PREVIOUS PAP - FULL OUTFIT DNA & ROOM CONTINUITY): Extract and match the exact outfit clothing details (${analyzedOutfit}) from Reference Image 2 and the continuous room/bedding setting. NEVER look at Reference Image 1 (Profile Pic) for clothing!` });
+          translatorParts.push({ text: `REFERENCE IMAGE 2 (PREVIOUS PAP - FULL OUTFIT DNA & ROOM CONTINUITY): Extract and match the exact outfit clothing details and the continuous room/bedding setting.` });
         }
         translatorParts.push({ inlineData: { mimeType, data } });
 
@@ -3441,18 +3410,9 @@ Retain the EXACT SAME LOCATION/SETTING with previous PAP (${analyzedRoom}). Char
       outfitTransitionInstruction = `
       - OUTFIT CONDITION (PARTIAL ADJUSTMENT / EXPOSURE WHILE WEARING CLOTHES):
         * USER INTENT: The user requested partial exposure/adjustment while keeping clothes on body: "${rawCaption}".
-        * EXAMINE REFERENCE IMAGE 2 VISUALLY FOR CURRENT OUTFIT DNA:
-          - Character 1 is STILL WEARING her exact outfit from Reference Image 2 (${analyzedOutfit}) on her body.
-          - Top Garment: ${topGarment || 'her top/shirt from Image 2'}
-          - Bottom Garment: ${bottomGarment || 'her bottom/pants/skirt from Image 2'}
-          - Dress: ${dressGarment || 'none'}
-        * ABSOLUTE BANNED SOURCE: NEVER look at Reference Image 1 (Profile Pic) for clothing, fabric, or room setting! Reference Image 1 is strictly an isolated crop for face/identity ONLY.
-        * MULTIMODAL NLU ACTION DIRECTION:
-          - Examine her exact clothing item in Reference Image 2 visually.
-          - Describe Character 1 actively pulling, unbuttoning, shifting, or lifting THAT SPECIFIC ITEM from Reference Image 2 (${analyzedOutfit}) according to the user's command ("${englishCaption}").
-          - Example: If in Reference Image 2 she is wearing a strapless crop top and user asks "tarik baju ke bawah pamer tetek", describe: "Character 1 is pulling down her exact strapless crop top from Reference Image 2 below her breasts, revealing her bare breasts while the crop top stays shifted down around her midriff/waist".
-          - Preserve 100% fabric texture, color, and design continuity from Reference Image 2.
-        * ABSOLUTE CRITICAL RULE (ZERO DISCARDED CLOTHES): The garment is STILL ON THE BODY in an adjusted state. DO NOT render, describe, or place any discarded garments, dropped clothes, or empty clothes on the bed, sofa, or floor. The background/furniture MUST be 100% clean and free of discarded garments.`;
+        * Character 1 is STILL WEARING ${agentPossessive} outfit (${analyzedOutfit}) on ${agentPossessive} body.
+        * The garment is partially unbuttoned, shifted, pulled down, lifted up, or unzipped as requested (${garmentStatus.actionDescription}), exposing bare skin naturally (e.g. cleavage, chest, thighs, or waist).
+        * ABSOLUTE CRITICAL RULE (ZERO DISCARDED CLOTHES): The garment is STILL ON THE BODY. DO NOT render, describe, or place any discarded garments, dropped clothes, or empty clothes on the bed, sofa, or floor. The background/furniture MUST be 100% clean and free of discarded garments.`;
     } else if (isEffectiveUndress) {
       if (isBottomOnlyUndress) {
         if (isDress) {
@@ -3577,14 +3537,8 @@ Retain the EXACT SAME LOCATION/SETTING with previous PAP (${analyzedRoom}). Char
          - Faithfully match skin tone, natural complexion undertones, and any visible tattoos, body piercings, or skin markings.
          - Faithfully reflect body build/proportions, bust volume (estimated accurately from what is visible in the reference photo), and stomach/tummy physique.
          - ABSOLUTE ROOM & BACKGROUND ISOLATION: Absolutely NEVER copy, extract, or replicate the background, wall tone, furniture, bedding, or setting from Image 1! Image 1 is strictly a facial & physical biometric anchor ONLY.
-      2. OUTFIT, ROOM & ENVIRONMENT CONTINUITY (From Conversation Context & Previous PAP in Reference Image 2):
-         - ABSOLUTE BANNED SOURCE RULE: NEVER, EVER look at Reference Image 1 (Profile Pic) for clothing, outfit style, fabric, or room background! Reference Image 1 is strictly an isolated crop for facial features and biometric identity ONLY.
-         - EXAMINE REFERENCE IMAGE 2 VISUALLY FOR CURRENT OUTFIT: Reference Image 2 is her current photo session. Character 1 is currently wearing her outfit from Reference Image 2 (${analyzedOutfit}).
-         - MULTIMODAL NLU ACTION DIRECTIVE:
-           When user requests an adjustment or gesture on her clothes ("${englishCaption}"):
-           1. Look closely at Reference Image 2 to identify the exact top/bottom item (e.g., strapless crop top, ribbed tank top, cardigan, mini dress, jeans, etc., with its exact color, texture, fabric, and cut).
-           2. Describe Character 1 actively adjusting, shifting, or pulling THAT SPECIFIC ITEM from Reference Image 2 according to the user's command.
-           3. Maintain 100% fabric, color, and design continuity with Reference Image 2.
+      2. OUTFIT, ROOM & ENVIRONMENT CONTINUITY (From Conversation Context & Previous PAP):
+         - The room and background environment MUST strictly be determined by the ongoing conversation context and previous PAP session (${analyzedRoom}), NEVER by Image 1 (Profile Pic).
          ${hasPreviousPap 
            ? `- MICRO-COMPACT ANCHORING FOR DISCARDED CLOTHES:
               * Authentic Storytelling Prop: The discarded garments from ${papSlotUpper} serve as a discreet, authentic prop in the scene (like editorial candid photo sets).
