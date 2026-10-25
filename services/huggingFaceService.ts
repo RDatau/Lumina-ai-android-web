@@ -40,8 +40,8 @@ export interface GradioInputComponent {
   defaultValue: any;
 }
 
-export const DEFAULT_QWEN_SPACE_URL = 'https://huggingface.co/spaces/bennie2390/Qwen-Image-Edit-Rapid-AIO-Loras-Experimental';
-export const DEFAULT_QWEN_SPACE_HOST = 'https://bennie2390-qwen-image-edit-rapid-aio-loras-experimental.hf.space';
+export const DEFAULT_QWEN_SPACE_URL = 'https://huggingface.co/spaces/FelyaHuhing/qwen-image-21-uncensored';
+export const DEFAULT_QWEN_SPACE_HOST = 'https://felyahuhing-qwen-image-21-uncensored.hf.space';
 
 export const DEFAULT_WAN_VIDEO_SPACE_URL = 'https://huggingface.co/spaces/Ben2390/Wan_2.2_I2V_Studio-2';
 export const DEFAULT_WAN_VIDEO_SPACE_HOST = 'https://ben2390-wan-2-2-i2v-studio-2.hf.space';
@@ -303,7 +303,9 @@ export const normalizeHFSpaceUrl = async (rawUrl?: string): Promise<string> => {
     const owner = match[1];
     const repo = match[2];
 
-    // Cek special alias cepat
+    if (owner.toLowerCase() === 'felyahuhing' && repo.toLowerCase() === 'qwen-image-21-uncensored') {
+      return 'https://felyahuhing-qwen-image-21-uncensored.hf.space';
+    }
     if (owner.toLowerCase() === 'bennie2390' && repo.toLowerCase() === 'qwen-image-edit-rapid-aio-loras-experimental') {
       return 'https://bennie2390-qwen-image-edit-rapid-aio-loras-experimental.hf.space';
     }
@@ -885,7 +887,7 @@ const inspectSpaceEndpoint = async (
 
           // 2. Jika tidak cocok (misal user minta '/predict' padahal Space punya '/infer'), cari dari nama standar gambar
           if (!matchedDep) {
-            const priorityNames = ['infer', 'generate', 'image_edit', 'edit_image', 'process', 'predict', 'run'];
+            const priorityNames = ['edit', 'infer', 'generate', 'image_edit', 'edit_image', 'process', 'predict', 'run'];
             for (const pName of priorityNames) {
               const found = cfg.dependencies.find((d: any) => 
                 d.api_name && d.api_name.toLowerCase() === pName && isRealInferenceDep(d)
@@ -1094,7 +1096,17 @@ export const generateWithHuggingFaceSpace = async (
       // Bangun payload data dinamis berdasarkan skema komponen Space
       payloadData = [];
 
-      if (inputComponents.length > 0) {
+      if (spaceHost.includes('felyahuhing-qwen-image-21-uncensored') || inputComponents.length === 7 || endpoint === '/edit') {
+        payloadData = [
+          effectivePrompt,
+          formattedImage || null,
+          null,
+          28,
+          0,
+          true,
+          1.0
+        ];
+      } else if (inputComponents.length > 0) {
         let imageInputCount = 0;
 
         for (const comp of inputComponents) {

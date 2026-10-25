@@ -1198,20 +1198,37 @@ const ChatView: React.FC<ChatViewProps> = ({
 
   const currentMediaIndex = useMemo(() => {
     if (!previewMedia) return -1;
-    return allMediaItems.findIndex(item => item.data === previewMedia.data);
+    const exactMatch = allMediaItems.findIndex(item => item.id === previewMedia.id && item.data === previewMedia.data);
+    if (exactMatch !== -1) return exactMatch;
+    const dataMatch = allMediaItems.findIndex(item => item.data === previewMedia.data);
+    if (dataMatch !== -1) return dataMatch;
+    const idMatch = allMediaItems.findIndex(item => item.id === previewMedia.id);
+    return idMatch;
   }, [previewMedia, allMediaItems]);
 
   const handleNextMedia = () => {
     if (currentMediaIndex < allMediaItems.length - 1) {
       const next = allMediaItems[currentMediaIndex + 1];
-      setPreviewMedia({ name: next.name, data: next.data, mimeType: next.type === 'image' ? 'image/png' : (next.mimeType || 'video/mp4') });
+      setPreviewMedia({ 
+        id: next.id, 
+        name: next.name, 
+        data: next.data, 
+        mimeType: next.mimeType || (next.type === 'image' ? 'image/png' : next.type === 'video' ? 'video/mp4' : next.type === 'audio' ? 'audio/mpeg' : 'application/octet-stream'),
+        type: next.type
+      } as any);
     }
   };
 
   const handlePrevMedia = () => {
     if (currentMediaIndex > 0) {
       const prev = allMediaItems[currentMediaIndex - 1];
-      setPreviewMedia({ name: prev.name, data: prev.data, mimeType: prev.type === 'image' ? 'image/png' : (prev.mimeType || 'video/mp4') });
+      setPreviewMedia({ 
+        id: prev.id, 
+        name: prev.name, 
+        data: prev.data, 
+        mimeType: prev.mimeType || (prev.type === 'image' ? 'image/png' : prev.type === 'video' ? 'video/mp4' : prev.type === 'audio' ? 'audio/mpeg' : 'application/octet-stream'),
+        type: prev.type
+      } as any);
     }
   };
 

@@ -1,6 +1,6 @@
 import { AgentConfig, ChatMessage, ChatSession, CallHistory, UserProfile, GlobalAppearance, GlobalGeminiSettings } from '../types';
 
-export const DEFAULT_QWEN_SPACE_URL = 'https://huggingface.co/spaces/bennie2390/Qwen-Image-Edit-Rapid-AIO-Loras-Experimental';
+export const DEFAULT_QWEN_SPACE_URL = 'https://huggingface.co/spaces/FelyaHuhing/qwen-image-21-uncensored';
 export const DEFAULT_WAN_VIDEO_SPACE_URL = 'https://huggingface.co/spaces/Ben2390/Wan_2.2_I2V_Studio-2';
 export const DEFAULT_LTX_VIDEO_SPACE_URL = 'https://huggingface.co/spaces/rdata92/LTX-2.3-10Eros';
 
@@ -18,7 +18,7 @@ export const DEFAULT_GLOBAL_GEMINI_SETTINGS: GlobalGeminiSettings = {
   hfVideoSpaceUrl: DEFAULT_WAN_VIDEO_SPACE_URL,
   videoGeneratorModel: 'wan2.2',
   hfTokens: '',
-  hfApiEndpoint: '/infer',
+  hfApiEndpoint: '/edit',
   injectNegativePrompt: true,
   injectAnatomyGuard: true,
 };
