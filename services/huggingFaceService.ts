@@ -472,8 +472,7 @@ const uploadToGradio = async (spaceHost: string, dataUrl: string, token?: string
 
     const uploadEndpoints = [
       `${spaceHost}/gradio_api/upload`,
-      `${spaceHost}/upload`,
-      `${spaceHost}/api/upload`
+      `${spaceHost}/upload`
     ];
 
     for (const ep of uploadEndpoints) {
@@ -1108,39 +1107,29 @@ export const generateWithHuggingFaceSpace = async (
         onStatusUpdate?.("Seluruh referensi gambar terunggah. Menghubungkan ke Space ZeroGPU...");
       }
 
-      const allExtraImages: any[] = [];
-      const rawExtraList = [formattedExtraRef, ...formattedGallery].filter(Boolean);
-      for (const item of rawExtraList.slice(0, 9)) {
-        if (typeof item === 'object' && item !== null) {
-          const pathVal = item.path || item.url || null;
-          if (pathVal) {
-            allExtraImages.push({ image: item, caption: null });
+      const extraBlobs: any[] = [];
+      if (formattedExtraRef) {
+        extraBlobs.push(formattedExtraRef);
+      }
+      if (formattedGallery.length > 0) {
+        for (const galImg of formattedGallery) {
+          if (galImg) {
+            extraBlobs.push(galImg);
           }
-        } else if (typeof item === 'string') {
-          allExtraImages.push({
-            image: {
-              path: item.startsWith('/') ? item : null,
-              url: item.startsWith('http') ? item : `${spaceHost}/gradio_api/file=${item}`,
-              orig_name: 'ref_image.png',
-              meta: { _type: 'gradio.FileData' }
-            },
-            caption: null
-          });
         }
       }
+
+      // Format extra_images sesuai spesifikasi: extraBlobs.map(b => ({ image: b }))
+      const extraImagesFormatted = extraBlobs.map(b => ({ image: b }));
 
       // Bangun payload data dinamis berdasarkan skema komponen Space
       payloadData = [];
 
-      const baseImgPayload = typeof formattedImage === 'object' && formattedImage !== null
-        ? formattedImage
-        : (formattedImage || inputImage);
-
       if (spaceHost.includes('felyahuhing-qwen-image-21-uncensored') || inputComponents.length === 7 || endpoint === '/edit') {
         payloadData = [
           effectivePrompt,
-          baseImgPayload || null,
-          allExtraImages.length > 0 ? allExtraImages : null,
+          formattedImage || null,
+          extraImagesFormatted.length > 0 ? extraImagesFormatted : null,
           28,
           0,
           true,
